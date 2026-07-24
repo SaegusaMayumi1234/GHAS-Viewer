@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import Button from 'primevue/button'
 import Message from 'primevue/message'
 import ProgressBar from 'primevue/progressbar'
-import Button from 'primevue/button'
 import Toast from 'primevue/toast'
 import { useToast } from 'primevue/usetoast'
 import { storeToRefs } from 'pinia'
@@ -10,6 +10,7 @@ import TopNav from './components/TopNav.vue'
 import FilterPanel from './components/FilterPanel.vue'
 import AlertTable from './components/AlertTable.vue'
 import AlertDetailDialog from './components/AlertDetailDialog.vue'
+import AzureImportDialog from './components/AzureImportDialog.vue'
 import { useGhasStore } from './stores/ghasStore'
 
 const toast = useToast()
@@ -22,11 +23,13 @@ const {
   importTotal,
   importWarnings,
   errorMessage,
+  dataSourceMode,
   indexingFolder,
   folderFileCount,
 } = storeToRefs(store)
 
 const fileInputRef = ref<HTMLInputElement | null>(null)
+const azureDialogVisible = ref(false)
 
 const openImportPicker = (): void => {
   fileInputRef.value?.click()
@@ -38,6 +41,10 @@ const onImportFile = async (event: Event): Promise<void> => {
   if (!file) return
   await store.importFromFile(file)
   target.value = ''
+}
+
+const openAzureWizard = (): void => {
+  azureDialogVisible.value = true
 }
 
 const connectFolder = async (): Promise<void> => {
@@ -120,24 +127,25 @@ const totalWarnings = computed(() => importWarnings.value.length)
       </section>
 
       <section class="action-panel">
-        <div class="action-panel__text">
-          <p class="action-panel__caption">
-            Import from exported JSON or connect your project folder for source preview.
-          </p>
-          <p class="action-panel__privacy">
-            Local-only processing: files are read and analyzed on your device and are never uploaded.
-          </p>
+        <div class="action-panel__text action-panel__text--full">
+          <p class="action-panel__caption">Azure DevOps direct mode: click connect, then org + PAT -> project -> repository -> load alerts.</p>
+          <p class="action-panel__privacy">PAT is kept in memory only and cleared on refresh.</p>
         </div>
+
         <div class="action-panel__buttons">
-          <Button label="Open JSON" @click="openImportPicker" />
+          <Button label="Connect Azure DevOps" @click="openAzureWizard" />
+          <Button label="Open JSON" severity="secondary" outlined @click="openImportPicker" />
           <Button
             :loading="indexingFolder"
             :label="folderFileCount > 0 ? `Project Folder (${folderFileCount})` : 'Connect Project Folder'"
             severity="secondary"
+            :disabled="dataSourceMode === 'azure'"
             @click="connectFolder"
           />
         </div>
       </section>
+
+      <AzureImportDialog v-model:visible="azureDialogVisible" />
 
       <section class="status-strip">
         <article v-for="card in statusCards" :key="card.label" class="status-card" :data-type="card.type">
@@ -149,7 +157,7 @@ const totalWarnings = computed(() => importWarnings.value.length)
       <Message v-if="errorMessage" severity="error">{{ errorMessage }}</Message>
       <Message v-for="warning in importWarnings" :key="warning" severity="warn">{{ warning }}</Message>
 
-      <section v-if="isImporting" class="import-progress">
+      <section v-if="isImporting && dataSourceMode !== 'azure'" class="import-progress">
         <p>Importing alerts... {{ importProgress }} / {{ importTotal }}</p>
         <ProgressBar :value="importTotal ? (importProgress / importTotal) * 100 : 0" />
       </section>

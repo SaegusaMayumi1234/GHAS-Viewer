@@ -112,4 +112,17 @@ export interface SearchHit {
   score?: number
 }
 
+export type DataSourceMode = 'file' | 'azure'
+
+export interface AzureProject {
+  id: string
+  name: string
+}
+
+export interface AzureRepository {
+  id: string
+  name: string
+  defaultBranch: string
+}
+
 

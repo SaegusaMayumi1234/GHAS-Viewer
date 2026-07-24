@@ -78,6 +78,8 @@ export const parseGhasFile = async (
   const total = parsed.length
   let invalid = 0
 
+  onProgress?.(0, total)
+
   for (let index = 0; index < total; index += 1) {
     const item = parsed[index]
     if (!isRecord(item)) {
@@ -154,7 +156,7 @@ export const parseGhasFile = async (
       raw,
     })
 
-    if (index > 0 && index % 250 === 0) {
+    if (index > 0 && index % 50 === 0) {
       onProgress?.(index + 1, total)
       await yieldToMainThread()
     }
