@@ -133,7 +133,118 @@ const formatDateLabel = (value: string): string => {
   </Dialog>
 </template>
 
-<style scoped>
+<style>
+.alert-detail-dialog .p-dialog {
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  background: var(--surface-glass);
+  box-shadow: var(--shadow-lg);
+}
+
+.alert-detail-dialog .p-dialog-header {
+  border-bottom: 1px solid var(--border);
+  background: color-mix(in srgb, var(--bg-panel), transparent 10%);
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+}
+
+.alert-detail-dialog .p-dialog-content {
+  border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+  padding: var(--space-md);
+}
+
+.detail-head {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-md);
+  margin-bottom: var(--space-sm);
+}
+
+.detail-head h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  line-height: 1.2;
+}
+
+.detail-head p {
+  margin: var(--space-xs) 0 0;
+  color: var(--text-soft);
+}
+
+.tag-stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+.detail-meta {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-md) var(--space-lg);
+  padding: var(--space-md);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--bg-panel), var(--accent) 4%);
+  margin-bottom: var(--space-md);
+}
+
+.detail-meta p {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.detail-meta strong {
+  color: var(--text-soft);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.detail-list {
+  display: grid;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
+.detail-list__item {
+  margin: 0;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+
+@media (max-width: 1120px) {
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 740px) {
+  .detail-meta {
+    grid-template-columns: 1fr;
+  }
+
+  .alert-detail-dialog .p-dialog {
+    margin: 0;
+    max-height: 100vh;
+    border-radius: 0;
+  }
+
+  .alert-detail-dialog .p-dialog-header {
+    padding: var(--space-sm);
+  }
+
+  .alert-detail-dialog .p-dialog-content {
+    padding: var(--space-sm);
+  }
+}
+
 .dep-chain {
   display: flex;
   flex-direction: column;

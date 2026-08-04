@@ -298,3 +298,118 @@ const fetchAzureAlerts = async (): Promise<void> => {
     </template>
   </Dialog>
 </template>
+
+<style>
+.azure-wizard__steps {
+  display: flex;
+  gap: var(--space-xs);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-md);
+}
+
+.azure-wizard .p-dialog {
+  overflow: hidden;
+  border-radius: var(--radius-xl);
+  background: var(--surface-glass);
+  box-shadow: var(--shadow-lg);
+}
+
+.azure-wizard .p-dialog-header {
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--bg-panel), transparent 6%),
+    color-mix(in srgb, var(--bg-panel), transparent 14%)
+  );
+  padding: var(--space-md);
+}
+
+.azure-wizard .p-dialog-content {
+  padding: var(--space-md);
+}
+
+.azure-wizard .p-dialog-footer {
+  border-top: 1px solid var(--border);
+  background: color-mix(in srgb, var(--bg-panel), transparent 12%);
+  padding: var(--space-sm) var(--space-md);
+}
+
+.azure-step {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--bg-panel), transparent 4%);
+  color: var(--text-soft);
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.38rem 0.72rem;
+}
+
+.azure-step.is-active {
+  border-color: color-mix(in srgb, var(--accent), var(--border) 45%);
+  background: color-mix(in srgb, var(--accent), transparent 86%);
+  color: var(--text);
+}
+
+.azure-step.is-done {
+  border-color: color-mix(in srgb, var(--accent-2), var(--border) 45%);
+  background: color-mix(in srgb, var(--accent-2), transparent 86%);
+}
+
+.azure-wizard__feedback {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.azure-wizard__warnings {
+  border: 1px solid color-mix(in srgb, var(--severity-medium), var(--border) 50%);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--severity-medium), transparent 92%);
+  padding: 0.35rem;
+  max-height: 180px;
+  overflow: auto;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.azure-feedback__message {
+  margin: 0;
+}
+
+.azure-feedback__message.p-message {
+  border-radius: var(--radius-md);
+}
+
+.azure-feedback__message.p-message .p-message-content {
+  align-items: flex-start;
+  padding: 0.55rem 0.7rem;
+}
+
+.azure-feedback__message.p-message .p-message-text {
+  font-size: 0.84rem;
+  line-height: 1.35;
+}
+
+.azure-feedback__message--warn.p-message {
+  background: color-mix(in srgb, var(--severity-medium), transparent 88%);
+  border-color: color-mix(in srgb, var(--severity-medium), var(--border) 55%);
+}
+
+.azure-feedback__message--success.p-message {
+  border-color: color-mix(in srgb, var(--severity-autofixable), var(--border) 50%);
+  background: color-mix(in srgb, var(--severity-autofixable), transparent 90%);
+}
+
+.azure-wizard__body {
+  display: grid;
+  gap: var(--space-sm);
+  margin-top: var(--space-xs);
+}
+
+.azure-wizard__actions {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-xs);
+  flex-wrap: wrap;
+}
+</style>

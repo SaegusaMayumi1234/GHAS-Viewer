@@ -57,3 +57,86 @@ const severityTone = (severity: string): 'danger' | 'warn' | 'success' | 'contra
     </Column>
   </DataTable>
 </template>
+
+<style>
+.alert-table {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  background: color-mix(in srgb, var(--bg-solid), transparent 0%);
+  box-shadow: var(--shadow-sm), var(--shadow-rim);
+}
+
+.alert-table__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-sm);
+}
+
+.alert-table__head h2 {
+  margin: 0;
+  font-size: 0.98rem;
+}
+
+.alert-table__head p {
+  margin: 3px 0 0;
+  color: var(--text-soft);
+  font-size: 0.8rem;
+}
+
+.p-datatable-table-container {
+  backdrop-filter: blur(0);
+}
+
+.p-datatable-thead > tr > th {
+  background: color-mix(in srgb, var(--bg-solid), var(--accent) 6%);
+  color: var(--text-soft);
+  border-color: var(--border);
+  font-size: 0.76rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.p-datatable-tbody > tr {
+  background: color-mix(in srgb, var(--bg-solid), transparent 0%);
+  transition: background var(--duration-fast) var(--ease-standard);
+}
+
+.p-datatable-tbody > tr > td,
+.p-datatable-thead > tr > th,
+.p-paginator {
+  border-color: var(--border);
+}
+
+.p-datatable-tbody > tr:hover {
+  background: color-mix(in srgb, var(--accent), transparent 92%);
+}
+
+.as-link {
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+  text-align: left;
+  color: var(--accent-2);
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.as-link:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 740px) {
+  .alert-table__head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .alert-table__head .p-button {
+    width: 100%;
+  }
+}
+</style>

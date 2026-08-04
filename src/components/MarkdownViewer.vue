@@ -22,3 +22,21 @@ const safeHtml = computed(() => {
 <template>
   <div class="markdown-body" v-html="safeHtml" />
 </template>
+
+<style>
+.markdown-body {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-sm);
+  max-height: 360px;
+  overflow: auto;
+  background: color-mix(in srgb, var(--bg-solid), transparent 2%);
+}
+
+.markdown-body pre {
+  overflow: auto;
+  padding: var(--space-sm);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--bg-solid), #000 10%);
+}
+</style>

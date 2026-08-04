@@ -113,3 +113,94 @@ const toSelectOptions = (values: string[]) => [
     </div>
   </section>
 </template>
+
+<style>
+.filter-panel {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  background: var(--surface-panel);
+  box-shadow: var(--shadow-sm), var(--shadow-rim);
+  padding: var(--space-md);
+}
+
+.filter-panel__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-sm);
+}
+
+.filter-panel__head h2 {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.filter-panel__head p {
+  margin: 2px 0 0;
+  color: var(--text-soft);
+  font-size: 0.78rem;
+}
+
+.filter-panel__grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.filter-row {
+  display: grid;
+  gap: var(--space-sm);
+  align-items: end;
+}
+
+.filter-row--search {
+  grid-template-columns: 1fr;
+}
+
+.filter-row--dropdowns,
+.filter-row--text-inputs {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.filter-row--actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.filter-row--checkboxes {
+  grid-template-columns: 1fr;
+}
+
+.check-row-inline {
+  display: flex;
+  gap: var(--space-xs);
+  align-items: center;
+  min-height: 1.8rem;
+}
+
+.check-row-inline label {
+  white-space: nowrap;
+}
+
+@media (max-width: 1120px) {
+  .filter-row--dropdowns,
+  .filter-row--text-inputs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 740px) {
+  .filter-row--dropdowns,
+  .filter-row--text-inputs {
+    grid-template-columns: 1fr;
+  }
+
+  .filter-panel__head,
+  .filter-row--actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+</style>
