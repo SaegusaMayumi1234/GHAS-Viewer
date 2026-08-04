@@ -21,6 +21,11 @@ export interface GhasRegion {
   columnEnd?: number
 }
 
+export interface GhasLogicalLocation {
+  fullyQualifiedName?: string
+  kind?: string
+}
+
 export interface GhasPhysicalLocation {
   filePath?: string
   isValidGitPath?: boolean
@@ -44,7 +49,7 @@ export interface RawGhasAlert {
   introducedDate?: string
   state?: string
   physicalLocations?: GhasPhysicalLocation[]
-  logicalLocations?: unknown[]
+  logicalLocations?: GhasLogicalLocation[]
   hasTrustedSourceOrigin?: boolean
   isAutoFixable?: boolean
   _repoName?: string
@@ -82,6 +87,7 @@ export interface NormalizedGhasAlert {
   helpMessages: string[]
   resources: string[]
   tags: string[]
+  logicalLocations: GhasLogicalLocation[]
   indexedText: string
   raw: RawGhasAlert
 }

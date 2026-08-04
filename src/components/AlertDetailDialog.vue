@@ -21,6 +21,16 @@ const firstHelpMessage = computed(() => store.selectedAlert?.helpMessages[0] || 
 const firstResources = computed(() => store.selectedAlert?.resources[0] || '')
 const ruleDescriptions = computed(() => store.selectedAlert?.ruleDescriptions || [])
 const primaryLocation = computed(() => store.selectedAlert?.locations[0] ?? null)
+const logicalLocations = computed(() => store.selectedAlert?.logicalLocations ?? [])
+
+const formatLocationKind = (kind: string | undefined): string => {
+  if (!kind) return 'Location'
+  return kind
+    .replace(/([A-Z])/g, ' $1')
+    .replace(/^./, (c) => c.toUpperCase())
+    .trim()
+}
+
 const hasSourcePreview = computed(
   () => primaryLocation.value?.filePath && primaryLocation.value?.lineStart != null,
 )
@@ -92,6 +102,23 @@ const formatDateLabel = (value: string): string => {
         </div>
       </section>
 
+      <section v-if="logicalLocations.length">
+        <h3>Dependency Path</h3>
+        <div class="dep-chain">
+          <template v-for="(loc, i) in logicalLocations" :key="loc.fullyQualifiedName ?? i">
+            <div class="dep-chain__connector" v-if="i > 0">
+              <span class="dep-chain__line" />
+              <span class="dep-chain__arrow">↓</span>
+              <span class="dep-chain__line" />
+            </div>
+            <div class="dep-chain__node" :class="`dep-chain__node--${loc.kind ?? 'default'}`">
+              <span class="dep-chain__kind">{{ formatLocationKind(loc.kind) }}</span>
+              <span class="dep-chain__name">{{ loc.fullyQualifiedName || '-' }}</span>
+            </div>
+          </template>
+        </div>
+      </section>
+
       <section>
         <h3>Source Preview</h3>
         <Message v-if="!hasSourcePreview" severity="info">
@@ -105,3 +132,70 @@ const formatDateLabel = (value: string): string => {
     </template>
   </Dialog>
 </template>
+
+<style scoped>
+.dep-chain {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+  margin-bottom: var(--space-md);
+}
+
+.dep-chain__node {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--bg-panel), var(--accent) 4%);
+  min-width: 240px;
+  max-width: 100%;
+}
+
+.dep-chain__node--rootDependency {
+  border-color: color-mix(in srgb, var(--accent), transparent 40%);
+  background: color-mix(in srgb, var(--bg-panel), var(--accent) 8%);
+}
+
+.dep-chain__kind {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-soft);
+}
+
+.dep-chain__node--rootDependency .dep-chain__kind {
+  color: var(--accent);
+}
+
+.dep-chain__name {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  color: var(--text);
+  word-break: break-all;
+}
+
+.dep-chain__connector {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  padding: 0 var(--space-md);
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.dep-chain__line {
+  display: block;
+  width: 1px;
+  height: 10px;
+  background: var(--border-strong);
+}
+
+.dep-chain__arrow {
+  line-height: 1;
+}
+</style>

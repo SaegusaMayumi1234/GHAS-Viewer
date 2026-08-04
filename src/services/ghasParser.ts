@@ -1,4 +1,4 @@
-import type { ImportResult, NormalizedGhasAlert, RawGhasAlert, SeverityLevel } from '../types/ghas'
+import type { GhasLogicalLocation, ImportResult, NormalizedGhasAlert, RawGhasAlert, SeverityLevel } from '../types/ghas'
 
 const KNOWN_SEVERITY: SeverityLevel[] = ['critical', 'high', 'medium', 'low', 'warning', 'note', 'unknown']
 
@@ -56,6 +56,19 @@ const buildRowKey = (
     : 'no-location'
 
   return `${repositoryName}::${alertId}::${locationKey}::${index}`
+}
+
+const normalizeLogicalLocations = (logicalLocations: GhasLogicalLocation[]): GhasLogicalLocation[] => {
+  const roots = logicalLocations.filter((loc) => loc.kind === 'rootDependency').reverse()
+  const others = logicalLocations.filter((loc) => loc.kind !== 'rootDependency')
+  const seen = new Set<string>()
+  const dedupedRoots = roots.filter((loc) => {
+    const key = loc.fullyQualifiedName ?? ''
+    if (seen.has(key)) return false
+    seen.add(key)
+    return true
+  })
+  return [...dedupedRoots, ...others]
 }
 
 export const parseGhasFile = async (
@@ -122,6 +135,11 @@ export const parseGhasFile = async (
       ]
     })
 
+    const logicalLocations = normalizeLogicalLocations((Array.isArray(raw.logicalLocations) ? raw.logicalLocations : []).filter(
+      (loc): loc is GhasLogicalLocation =>
+        isRecord(loc) && (typeof loc.fullyQualifiedName === 'string' || typeof loc.kind === 'string'),
+    ))
+
     const searchBucket: string[] = []
     collectPrimitiveValues(raw, searchBucket)
 
@@ -145,6 +163,7 @@ export const parseGhasFile = async (
       hasTrustedSourceOrigin: Boolean(raw.hasTrustedSourceOrigin),
       isAutoFixable: Boolean(raw.isAutoFixable),
       locations,
+      logicalLocations,
       toolNames,
       ruleIds,
       ruleNames,
@@ -177,5 +196,3 @@ export const parseGhasFile = async (
     },
   }
 }
-
-
