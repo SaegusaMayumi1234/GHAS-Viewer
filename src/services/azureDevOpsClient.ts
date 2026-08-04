@@ -64,20 +64,51 @@ const expandBranchRefVariants = (value: string | undefined): string[] => {
   return Array.from(new Set(variants.map((item) => item.trim()).filter(Boolean)))
 }
 
+const parseJsonOrThrow = async <T>(response: Response): Promise<T> => {
+  const text = await response.text()
+  try {
+    return JSON.parse(text) as T
+  } catch {
+    if (text.trimStart().startsWith('<')) {
+      throw new Error(
+        'Invalid or expired PAT – the server returned an HTML page instead of JSON. Check your Personal Access Token and organization name.',
+      )
+    }
+    throw new Error(`Response is not valid JSON: ${text.slice(0, 200)}`)
+  }
+}
+
+const fetchWithAuth = async (url: string, pat: string): Promise<Response> => {
+  try {
+    return await fetch(url, {
+      headers: {
+        Authorization: buildAuthHeader(pat),
+        Accept: 'application/json',
+      },
+    })
+  } catch {
+    throw new Error(
+      'Request blocked – the server rejected the connection. Your PAT may be expired or invalid.',
+    )
+  }
+}
+
+const authErrorMessage = (status: number, detail: string): string => {
+  if (status === 401 || status === 403) {
+    return `Authentication failed (${status}) – your PAT may be expired or lack the required scopes. ${detail}`.trim()
+  }
+  return `HTTP ${status}: ${detail}`
+}
+
 const requestJson = async <T>(url: string, pat: string): Promise<T> => {
-  const response = await fetch(url, {
-    headers: {
-      Authorization: buildAuthHeader(pat),
-      Accept: 'application/json',
-    },
-  })
+  const response = await fetchWithAuth(url, pat)
 
   if (!response.ok) {
     const detail = await toErrorMessage(response)
-    throw new Error(`HTTP ${response.status}: ${detail}`)
+    throw new Error(authErrorMessage(response.status, detail))
   }
 
-  return (await response.json()) as T
+  return parseJsonOrThrow<T>(response)
 }
 
 interface JsonWithContinuation<T> {
@@ -89,19 +120,14 @@ const requestJsonWithContinuation = async <T>(
   url: string,
   pat: string,
 ): Promise<JsonWithContinuation<T>> => {
-  const response = await fetch(url, {
-    headers: {
-      Authorization: buildAuthHeader(pat),
-      Accept: 'application/json',
-    },
-  })
+  const response = await fetchWithAuth(url, pat)
 
   if (!response.ok) {
     const detail = await toErrorMessage(response)
-    throw new Error(`HTTP ${response.status}: ${detail}`)
+    throw new Error(authErrorMessage(response.status, detail))
   }
 
-  const data = (await response.json()) as T
+  const data = await parseJsonOrThrow<T>(response)
   const continuationToken = response.headers.get('x-ms-continuationtoken')
   return { data, continuationToken }
 }
@@ -291,12 +317,7 @@ export const fetchAzureSourceText = async (context: AzureSourceContext): Promise
 
     const url = `https://dev.azure.com/${encodeURIComponent(context.org)}/${encodeURIComponent(context.project)}/_apis/git/repositories/${encodeURIComponent(context.repoId)}/items?${params.toString()}`
 
-    const response = await fetch(url, {
-      headers: {
-        Authorization: buildAuthHeader(context.pat),
-        Accept: 'application/json',
-      },
-    })
+    const response = await fetchWithAuth(url, context.pat)
 
     if (response.status === 404) {
       continue
@@ -313,10 +334,10 @@ export const fetchAzureSourceText = async (context: AzureSourceContext): Promise
         continue
       }
 
-      throw new Error(`HTTP ${response.status}: ${detail}`)
+      throw new Error(authErrorMessage(response.status, detail))
     }
 
-    const json = (await response.json()) as AzureItemsResponse
+    const json = await parseJsonOrThrow<AzureItemsResponse>(response)
     if (typeof json.content === 'string') {
       return json.content
     }
