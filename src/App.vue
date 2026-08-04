@@ -81,7 +81,7 @@ const statusCards = computed(() => {
   ]
 })
 
-const totalWarnings = computed(() => importWarnings.value.length)
+
 
 const exportJson = (): void => {
   if (filteredAlerts.value.length === 0) {
@@ -114,33 +114,7 @@ const exportJson = (): void => {
     />
 
     <main class="content">
-      <section class="hero-panel">
-        <div>
-          <h2 class="hero-panel__title">Security posture at a glance</h2>
-          <p class="hero-panel__subtitle">
-            Explore alert trends, drill into root causes, and move from triage to remediation faster.
-          </p>
-        </div>
 
-        <div class="hero-panel__facts">
-          <article class="fact-chip">
-            <span>Active alerts</span>
-            <strong>{{ stats.totalFiltered }}</strong>
-          </article>
-          <article class="fact-chip">
-            <span>Total imported</span>
-            <strong>{{ stats.totalImported }}</strong>
-          </article>
-          <article class="fact-chip">
-            <span>Open critical</span>
-            <strong>{{ statusCards.find((card) => card.type === 'critical')?.value ?? 0 }}</strong>
-          </article>
-          <article class="fact-chip">
-            <span>Import warnings</span>
-            <strong>{{ totalWarnings }}</strong>
-          </article>
-        </div>
-      </section>
 
       <section class="action-panel">
         <div class="action-panel__text action-panel__text--full">
