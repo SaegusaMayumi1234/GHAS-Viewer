@@ -8,7 +8,7 @@ const props = defineProps<{
 }>()
 
 const md = new MarkdownIt({
-  html: false,
+  html: true,
   breaks: true,
   linkify: true,
 })
@@ -29,14 +29,30 @@ const safeHtml = computed(() => {
   border-radius: var(--radius-lg);
   padding: var(--space-sm);
   max-height: 360px;
+  min-width: 0;
   overflow: auto;
+  overflow-x: auto;
   background: color-mix(in srgb, var(--bg-solid), transparent 2%);
 }
 
+.markdown-body table {
+  display: block;
+  overflow-x: auto;
+  width: max-content;
+  max-width: 100%;
+}
+
 .markdown-body pre {
-  overflow: auto;
+  overflow-x: auto;
+  min-width: 0;
   padding: var(--space-sm);
   border-radius: var(--radius-sm);
   background: color-mix(in srgb, var(--bg-solid), #000 10%);
+}
+
+.markdown-body pre code {
+  display: block;
+  width: max-content;
+  min-width: 100%;
 }
 </style>

@@ -219,6 +219,10 @@ const formatDateLabel = (value: string): string => {
   margin-bottom: var(--space-md);
 }
 
+.detail-grid > div {
+  min-width: 0;
+}
+
 @media (max-width: 1120px) {
   .detail-grid {
     grid-template-columns: 1fr;

@@ -1,4 +1,5 @@
 import type { GhasLogicalLocation, ImportResult, NormalizedGhasAlert, RawGhasAlert, SeverityLevel } from '../types/ghas'
+import { decodeHtmlEntities } from '../utils/htmlEntities'
 
 const KNOWN_SEVERITY: SeverityLevel[] = ['critical', 'high', 'medium', 'low', 'warning', 'note', 'unknown']
 
@@ -115,7 +116,7 @@ export const parseGhasFile = async (
       .map((rule) => toStringValue(rule.friendlyName || rule.opaqueId))
       .filter(Boolean)
     const ruleDescriptions = allRules.map((rule) => toStringValue(rule.description)).filter(Boolean)
-    const helpMessages = allRules.map((rule) => toStringValue(rule.helpMessage)).filter(Boolean)
+    const helpMessages = allRules.map((rule) => decodeHtmlEntities(toStringValue(rule.helpMessage))).filter(Boolean)
     const resources = allRules.map((rule) => toStringValue(rule.resources)).filter(Boolean)
     const tags = allRules.flatMap((rule) => (Array.isArray(rule.tags) ? rule.tags : [])).map(String)
 
@@ -150,7 +151,7 @@ export const parseGhasFile = async (
       rowKey: buildRowKey(repositoryName, alertId, locations, index),
       id: alertId,
       severity: normalizeSeverity(raw.severity),
-      title: toStringValue(raw.title),
+      title: decodeHtmlEntities(toStringValue(raw.title)),
       state: toStringValue(raw.state || 'unknown') || 'unknown',
       repositoryName,
       repositoryUrl: toStringValue(raw.repositoryUrl),
