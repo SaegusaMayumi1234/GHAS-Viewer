@@ -120,7 +120,7 @@ const goBackAzureStep = (): void => {
 const continueToProjectStep = async (): Promise<void> => {
   const nextOrg = azureOrgInput.value.trim()
   const nextPat = azurePatInput.value.trim()
-  const canReuseProjects = nextOrg === azureOrg.value && nextPat && azureProjects.value.length > 0
+  const canReuseProjects = nextOrg === azureOrg.value && nextPat === azurePat.value && azureProjects.value.length > 0
 
   store.clearAzureFeedback()
   connectAzure()
