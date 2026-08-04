@@ -80,6 +80,32 @@ const requestJson = async <T>(url: string, pat: string): Promise<T> => {
   return (await response.json()) as T
 }
 
+interface JsonWithContinuation<T> {
+  data: T
+  continuationToken: string | null
+}
+
+const requestJsonWithContinuation = async <T>(
+  url: string,
+  pat: string,
+): Promise<JsonWithContinuation<T>> => {
+  const response = await fetch(url, {
+    headers: {
+      Authorization: buildAuthHeader(pat),
+      Accept: 'application/json',
+    },
+  })
+
+  if (!response.ok) {
+    const detail = await toErrorMessage(response)
+    throw new Error(`HTTP ${response.status}: ${detail}`)
+  }
+
+  const data = (await response.json()) as T
+  const continuationToken = response.headers.get('x-ms-continuationtoken')
+  return { data, continuationToken }
+}
+
 export const listAzureProjects = async (org: string, pat: string): Promise<AzureProject[]> => {
   const url = `https://dev.azure.com/${encodeURIComponent(org)}/_apis/projects?api-version=7.1-preview.4`
   const json = await requestJson<AzureListResponse<{ id?: string; name?: string }>>(url, pat)
@@ -151,7 +177,7 @@ export const fetchAzureAlerts = async (
     const fetchForProjectSegment = async (projectSegment: string): Promise<RawGhasAlert[]> => {
       let lastError: unknown = null
 
-      const params = new URLSearchParams({
+      const baseParams = new URLSearchParams({
         top: '500',
         orderBy: 'severity',
         'criteria.alertType': String(alertType.value),
@@ -159,16 +185,40 @@ export const fetchAzureAlerts = async (
         'criteria.states': '1',
       })
 
-      for (const url of buildAlertCandidates(projectSegment, context.repoId, params)) {
+      const candidates = buildAlertCandidates(projectSegment, context.repoId, baseParams)
+
+      for (const candidateUrl of candidates) {
         try {
-          const json = await requestJson<AzureListResponse<RawGhasAlert>>(url, context.pat)
-          return (json.value ?? []).map((item) => ({
-            ...item,
-            _repoName: item._repoName ?? context.repoName,
-            repositoryId: item.repositoryId ?? context.repoId,
-            projectId: item.projectId ?? context.projectId,
-            gitRef: item.gitRef ?? context.ref,
-          }))
+          const collected: RawGhasAlert[] = []
+          let nextUrl: string | null = candidateUrl
+
+          while (nextUrl !== null) {
+            const { data, continuationToken } = await requestJsonWithContinuation<AzureListResponse<RawGhasAlert>>(
+              nextUrl,
+              context.pat,
+            )
+
+            const page = (data.value ?? []).map((item) => ({
+              ...item,
+              _repoName: item._repoName ?? context.repoName,
+              repositoryId: item.repositoryId ?? context.repoId,
+              projectId: item.projectId ?? context.projectId,
+              gitRef: item.gitRef ?? context.ref,
+            }))
+            collected.push(...page)
+
+            if (continuationToken) {
+              const nextParams = new URLSearchParams(baseParams)
+              nextParams.set('continuationToken', continuationToken)
+              // Replace the query string on the same base URL (scheme + host + path)
+              const base = candidateUrl.split('?')[0]
+              nextUrl = `${base}?${nextParams.toString()}`
+            } else {
+              nextUrl = null
+            }
+          }
+
+          return collected
         } catch (error) {
           lastError = error
         }
