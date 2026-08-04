@@ -963,6 +963,15 @@ body {
     justify-content: flex-start;
   }
 
+  .alert-table__head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .alert-table__head .p-button {
+    width: 100%;
+  }
+
   .alert-detail-dialog .p-dialog {
     margin: 0;
     max-height: 100vh;

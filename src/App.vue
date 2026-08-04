@@ -82,6 +82,22 @@ const statusCards = computed(() => {
 })
 
 const totalWarnings = computed(() => importWarnings.value.length)
+
+const exportJson = (): void => {
+  if (filteredAlerts.value.length === 0) {
+    toast.add({ severity: 'warn', summary: 'Nothing to export', detail: 'No alerts are currently shown in the table.', life: 4000 })
+    return
+  }
+  const json = JSON.stringify(filteredAlerts.value.map(a => a.raw), null, 2)
+  const date = new Date().toISOString().slice(0, 10)
+  const blob = new Blob([json], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `ghas-alerts-${date}.json`
+  a.click()
+  URL.revokeObjectURL(url)
+}
 </script>
 
 <template>
@@ -168,6 +184,7 @@ const totalWarnings = computed(() => importWarnings.value.length)
           <h2>Alert Explorer</h2>
           <p>Browse, filter, and inspect security findings across repositories.</p>
         </div>
+        <Button label="Export to JSON" @click="exportJson" />
       </section>
       <AlertTable :alerts="filteredAlerts" @open="store.openAlertDetails" />
     </main>
