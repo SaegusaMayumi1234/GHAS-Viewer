@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import { Cloud, FileJson, FolderOpen, Trash2 } from '@lucide/vue'
 import Button from 'primevue/button'
 import Message from 'primevue/message'
 import ProgressBar from 'primevue/progressbar'
@@ -56,7 +57,7 @@ const connectFolder = async (): Promise<void> => {
       severity: 'error',
       summary: 'Project folder unavailable',
       detail: reason,
-      life: 6500,
+      life: 8000,
     })
   }
 }
@@ -114,24 +115,60 @@ const exportJson = (): void => {
     />
 
     <main class="content">
-
-
       <section class="action-panel">
-        <div class="action-panel__text action-panel__text--full">
-          <p class="action-panel__caption">Azure DevOps direct mode: click connect, then org + PAT -> project -> repository -> load alerts.</p>
-          <p class="action-panel__privacy">PAT is kept in memory only and cleared on refresh.</p>
-        </div>
+        <header class="action-panel__header">
+          <h2 class="action-panel__title">Load Alerts</h2>
+          <p class="action-panel__subtitle">Connect to a data source or open an exported file to start exploring your GitHub Advanced Security findings.</p>
+        </header>
 
-        <div class="action-panel__buttons">
-          <Button label="Connect Azure DevOps" @click="openAzureWizard" />
-          <Button label="Open JSON" severity="secondary" outlined @click="openImportPicker" />
-          <Button
-            :loading="indexingFolder"
-            :label="folderFileCount > 0 ? `Project Folder (${folderFileCount})` : 'Connect Project Folder'"
-            severity="secondary"
-            :disabled="dataSourceMode === 'azure'"
-            @click="connectFolder"
-          />
+        <div class="action-cards">
+          <div class="action-card">
+            <Cloud class="action-card__icon" />
+            <div class="action-card__body">
+              <h3 class="action-card__name">Import from Azure DevOps</h3>
+              <p class="action-card__desc">Connect using your organization, personal access token, project, and repository to load alerts live.</p>
+              <p class="action-card__note">Token is kept in memory only and cleared on page refresh.</p>
+            </div>
+            <Button label="Connect" icon-pos="right" fluid @click="openAzureWizard" />
+          </div>
+
+          <div class="action-card">
+            <FileJson class="action-card__icon" />
+            <div class="action-card__body">
+              <h3 class="action-card__name">Import from JSON File</h3>
+              <p class="action-card__desc">Open a GHAS alerts JSON export saved on your local disk.</p>
+            </div>
+            <Button label="Open File" severity="secondary" outlined fluid @click="openImportPicker" />
+          </div>
+
+          <div class="action-card" :class="{ 'action-card--active': folderFileCount > 0, 'action-card--muted': dataSourceMode === 'azure' }">
+            <FolderOpen class="action-card__icon" />
+            <div class="action-card__body">
+              <h3 class="action-card__name">Link Source Folder</h3>
+              <p class="action-card__desc">Point to the local repository that matches your imported JSON file to enable inline source code preview next to each alert.</p>
+              <p v-if="dataSourceMode === 'azure'" class="action-card__note">Not available in Azure DevOps mode — source preview is fetched directly via the API.</p>
+              <p v-else-if="folderFileCount > 0" class="action-card__note action-card__note--ok">{{ folderFileCount }} files indexed</p>
+              <p v-else class="action-card__note">Only applies to JSON file imports.</p>
+            </div>
+            <Button
+              :loading="indexingFolder"
+              :label="folderFileCount > 0 ? 'Change Folder' : 'Link Folder'"
+              severity="secondary"
+              outlined
+              :disabled="dataSourceMode === 'azure'"
+              fluid
+              @click="connectFolder"
+            />
+          </div>
+
+          <div v-if="stats.totalImported > 0" class="action-card action-card--danger">
+            <Trash2 class="action-card__icon" />
+            <div class="action-card__body">
+              <h3 class="action-card__name">Clear All Alerts</h3>
+              <p class="action-card__desc">Remove all {{ stats.totalImported }} loaded alerts and reset all filters and state.</p>
+            </div>
+            <Button label="Clear All" severity="danger" outlined fluid @click="store.clearAlerts()" />
+          </div>
         </div>
       </section>
 

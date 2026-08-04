@@ -58,7 +58,7 @@ export class LocalSourceReader {
     }).showDirectoryPicker
 
     if (typeof picker !== 'function') {
-      throw new Error('This browser does not support folder access. Use a Chromium-based browser for this feature.')
+      throw new Error('This browser does not support folder access. Use a Chromium-based browser for this feature. (e.g. Chrome, Microsoft Edge)')
     }
 
     this.rootHandle = await picker({ mode: 'read' })

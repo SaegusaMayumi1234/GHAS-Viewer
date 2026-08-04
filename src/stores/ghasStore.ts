@@ -544,6 +544,21 @@ export const useGhasStore = defineStore('ghas', () => {
     globalSearch.value = ''
   }
 
+  const clearAlerts = (): void => {
+    alerts.value = []
+    importWarnings.value = []
+    errorMessage.value = ''
+    importProgress.value = 0
+    importTotal.value = 0
+    selectedAlertId.value = null
+    sourceSnippet.value = null
+    sourceError.value = ''
+    sourceSnippetCache.clear()
+    searchIndex.build([])
+    filters.value = { ...DEFAULT_FILTERS }
+    globalSearch.value = ''
+  }
+
   const openAlertDetails = async (alertKey: string): Promise<void> => {
     selectedAlertId.value = alertKey
     await loadAlertSourceSnippet()
@@ -608,5 +623,6 @@ export const useGhasStore = defineStore('ghas', () => {
     openAlertDetails,
     closeAlertDetails,
     resetFilters,
+    clearAlerts,
   }
 })
