@@ -385,6 +385,14 @@ body {
 }
 
 @media (max-width: 740px) {
+  /* Toast: stretch to near-full width so it doesn't overflow narrow screens.
+     !important is needed to override PrimeVue's .p-toast-top-right position class. */
+  .p-toast {
+    left: var(--space-md) !important;
+    right: var(--space-md) !important;
+    width: auto !important;
+  }
+
   .content {
     padding: var(--space-sm);
   }
