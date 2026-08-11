@@ -69,8 +69,9 @@ const repositoryUrl = computed((): string => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 16px;
-  padding: 8px 24px;
+  gap: var(--app-space-2);
+  width: 100%;
+  padding: var(--app-space-1) var(--app-space-3);
   border-bottom: 1px solid v-bind(borderColor);
   background: v-bind(cardColor);
 }
@@ -104,13 +105,13 @@ const repositoryUrl = computed((): string => {
   opacity: 0.5;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  font-size: 0.62rem;
+  font-size: var(--app-font-xs);
   font-weight: 700;
 }
 
 .top-nav__title-wrap h1 {
   margin: 0;
-  font-size: clamp(1rem, 1.2vw, 1.12rem);
+  font-size: var(--app-font-md);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -119,12 +120,13 @@ const repositoryUrl = computed((): string => {
 .top-nav__right {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--app-space-1);
+  min-width: 0;
 }
 
 .top-nav__mode-label {
   opacity: 0.55;
-  font-size: 0.78rem;
+  font-size: var(--app-font-sm);
   font-weight: 600;
 }
 
@@ -138,7 +140,7 @@ const repositoryUrl = computed((): string => {
   border-radius: 6px;
   color: inherit;
   text-decoration: none;
-  font-size: 0.8rem;
+  font-size: var(--app-font-sm);
   font-weight: 650;
   background: transparent;
   transition: background 0.15s;
@@ -154,12 +156,28 @@ const repositoryUrl = computed((): string => {
 }
 
 @media (max-width: 740px) {
-  .top-nav {
-    padding: 8px 12px;
-  }
-
   .top-nav__mode-label {
     display: none;
+  }
+
+  .top-nav__right {
+    gap: 6px;
+  }
+
+  .github-link-btn {
+    padding: 0 10px;
+    height: 32px;
+  }
+}
+
+@media (max-width: 560px) {
+  .top-nav {
+    flex-wrap: wrap;
+  }
+
+  .top-nav__right {
+    width: 100%;
+    justify-content: flex-end;
   }
 }
 </style>

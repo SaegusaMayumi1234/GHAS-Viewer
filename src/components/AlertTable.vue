@@ -19,11 +19,11 @@ const severityType = (severity: string): 'error' | 'warning' | 'success' | 'defa
 }
 
 const columns: DataTableColumns<NormalizedGhasAlert> = [
-  { title: 'ID', key: 'id', sorter: 'default', width: 80 },
+  { title: 'ID', key: 'id', sorter: 'default', width: 72 },
   {
     title: 'Details',
     key: 'actions',
-    width: 80,
+    width: 72,
     render: (row) =>
       h(NButton, { text: true, type: 'primary', size: 'small', onClick: () => emit('open', row.rowKey) }, { default: () => 'View' }),
   },
@@ -31,23 +31,23 @@ const columns: DataTableColumns<NormalizedGhasAlert> = [
     title: 'Severity',
     key: 'severity',
     sorter: 'default',
-    width: 110,
+    width: 100,
     render: (row) =>
       h(NTag, { type: severityType(row.severity), size: 'small' }, { default: () => row.severity }),
   },
-  { title: 'State', key: 'state', sorter: 'default', width: 110 },
-  { title: 'Repository', key: 'repositoryName', sorter: 'default', minWidth: 180 },
-  { title: 'Title', key: 'title', minWidth: 280 },
+  { title: 'State', key: 'state', sorter: 'default', width: 96 },
+  { title: 'Repository', key: 'repositoryName', sorter: 'default', minWidth: 150 },
+  { title: 'Title', key: 'title', minWidth: 210 },
   {
     title: 'Path',
     key: 'path',
-    minWidth: 240,
+    minWidth: 190,
     render: (row) => row.locations[0]?.filePath || '-',
   },
   {
     title: 'Tool',
     key: 'tool',
-    minWidth: 140,
+    minWidth: 120,
     render: (row) => row.toolNames.join(', ') || '-',
   },
 ]
@@ -69,13 +69,30 @@ const pagination = reactive({
 </script>
 
 <template>
-  <NDataTable
-    :columns="columns"
-    :data="props.alerts"
-    :row-key="(row) => row.rowKey"
-    :pagination="pagination"
-    size="small"
-    :scroll-x="1200"
-    striped
-  />
+  <div class="table-wrap">
+    <NDataTable
+      :columns="columns"
+      :data="props.alerts"
+      :row-key="(row) => row.rowKey"
+      :pagination="pagination"
+      size="small"
+      :scroll-x="980"
+      striped
+    />
+  </div>
 </template>
+
+<style scoped>
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 740px) {
+  .table-wrap :deep(.n-data-table-th),
+  .table-wrap :deep(.n-data-table-td) {
+    font-size: var(--app-font-xs);
+  }
+}
+</style>

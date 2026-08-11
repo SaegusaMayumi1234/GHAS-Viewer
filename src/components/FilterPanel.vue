@@ -104,24 +104,24 @@ const toMultiOptions = (values: string[]) => values.map((v) => ({ label: v, valu
 .filter-panel {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--app-space-2);
 }
 
 .filter-panel__head h2 {
   margin: 0;
-  font-size: 0.95rem;
+  font-size: var(--app-font-md);
 }
 
 .filter-panel__head p {
   margin: 2px 0 0;
   opacity: 0.6;
-  font-size: 0.78rem;
+  font-size: var(--app-font-sm);
 }
 
 .filter-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--app-space-2);
   align-items: end;
 }
 
@@ -138,7 +138,7 @@ const toMultiOptions = (values: string[]) => values.map((v) => ({ label: v, valu
 .field--checkboxes {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--app-space-1);
   justify-content: flex-end;
 }
 
@@ -148,23 +148,41 @@ const toMultiOptions = (values: string[]) => values.map((v) => ({ label: v, valu
   grid-column: 1 / -1;
 }
 
+.field :deep(.n-select),
+.field :deep(.n-input) {
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.field :deep(.n-select .n-base-selection) {
+  min-width: 0;
+}
+
+.field :deep(.n-base-selection-tags) {
+  flex-wrap: wrap;
+}
+
 .field > label {
-  font-size: 0.78rem;
+  font-size: var(--app-font-xs);
   opacity: 0.6;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
 
-@media (max-width: 1120px) {
+@media (max-width: 900px) {
   .filter-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-@media (max-width: 740px) {
+@media (max-width: 620px) {
   .filter-grid {
     grid-template-columns: 1fr;
+  }
+
+  .field--actions :deep(.n-button) {
+    width: 100%;
   }
 }
 </style>

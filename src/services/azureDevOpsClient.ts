@@ -178,6 +178,7 @@ export const fetchAzureAlerts = async (
   const warnings: string[] = []
   const allAlerts: RawGhasAlert[] = []
   let completedEndpoints = 0
+  let advSecDisabled = false
 
   onEndpointProgress?.(completedEndpoints, AZURE_ALERT_ENDPOINT_TOTAL)
 
@@ -277,7 +278,7 @@ export const fetchAzureAlerts = async (
       allAlerts.push(...alerts)
     } catch (error) {
       if (isAdvSecDisabledError(error)) {
-        warnings.push(`Advanced Security is not enabled for ${context.repoName}; ${alertType.label} alerts skipped.`)
+        advSecDisabled = true
       } else {
         const message = error instanceof Error ? error.message : String(error)
         warnings.push(
@@ -288,6 +289,12 @@ export const fetchAzureAlerts = async (
       completedEndpoints += 1
       onEndpointProgress?.(completedEndpoints, AZURE_ALERT_ENDPOINT_TOTAL)
     }
+  }
+
+  if (advSecDisabled) {
+    warnings.push(
+      `Advanced Security is not enabled for ${context.repoName}. Alert types requiring Advanced Security were skipped.`,
+    )
   }
 
   return {

@@ -17,6 +17,7 @@ import type {
   DataSourceMode,
   FilterState,
   NormalizedGhasAlert,
+  RawGhasAlert,
   SeverityLevel,
 } from '../types/ghas'
 
@@ -56,10 +57,11 @@ export const useGhasStore = defineStore('ghas', () => {
   const azureOrg = ref('')
   const azurePat = ref('')
   const azureRef = ref('')
+  const azureRepoRefs = ref<Record<string, string>>({})
   const azureProjects = ref<AzureProject[]>([])
   const azureRepos = ref<AzureRepository[]>([])
   const selectedAzureProjectId = ref('')
-  const selectedAzureRepoId = ref('')
+  const selectedAzureRepoIds = ref<string[]>([])
   const azureLoadingProjects = ref(false)
   const azureLoadingRepos = ref(false)
   const azureLoadingAlerts = ref(false)
@@ -74,8 +76,9 @@ export const useGhasStore = defineStore('ghas', () => {
     return azureProjects.value.find((project) => project.id === selectedAzureProjectId.value) ?? null
   })
 
-  const selectedAzureRepo = computed<AzureRepository | null>(() => {
-    return azureRepos.value.find((repo) => repo.id === selectedAzureRepoId.value) ?? null
+  const selectedAzureRepos = computed<AzureRepository[]>(() => {
+    const selectedIds = new Set(selectedAzureRepoIds.value)
+    return azureRepos.value.filter((repo) => selectedIds.has(repo.id))
   })
 
   const severityOptions = computed<SeverityLevel[]>(() => {
@@ -247,9 +250,11 @@ export const useGhasStore = defineStore('ghas', () => {
 
     if (dataSourceMode.value === 'azure') {
       const projectName = selectedAzureProject.value?.name
-      const repoId = alert.raw.repositoryId || selectedAzureRepoId.value
+      const repoId = alert.raw.repositoryId || selectedAzureRepoIds.value[0]
       const alertRef = alert.gitRef?.trim() ?? ''
-      const selectedRef = azureRef.value.trim()
+      const selectedRef = repoId
+        ? (azureRepoRefs.value[repoId]?.trim() || azureRef.value.trim())
+        : azureRef.value.trim()
       const resolvedRef = alertRef || selectedRef
 
       if (!projectName || !repoId || !resolvedRef) {
@@ -345,7 +350,8 @@ export const useGhasStore = defineStore('ghas', () => {
       azureProjects.value = []
       azureRepos.value = []
       selectedAzureProjectId.value = ''
-      selectedAzureRepoId.value = ''
+      selectedAzureRepoIds.value = []
+      azureRepoRefs.value = {}
       azureRef.value = ''
       azureWarnings.value = []
     }
@@ -369,7 +375,8 @@ export const useGhasStore = defineStore('ghas', () => {
 
       if (!hasSelectedProject) {
         selectedAzureProjectId.value = ''
-        selectedAzureRepoId.value = ''
+        selectedAzureRepoIds.value = []
+        azureRepoRefs.value = {}
         azureRepos.value = []
         azureRef.value = ''
       }
@@ -386,7 +393,8 @@ export const useGhasStore = defineStore('ghas', () => {
     }
 
     selectedAzureProjectId.value = projectId
-    selectedAzureRepoId.value = ''
+    selectedAzureRepoIds.value = []
+    azureRepoRefs.value = {}
     azureRepos.value = []
     azureRef.value = ''
     azureWarnings.value = []
@@ -404,13 +412,31 @@ export const useGhasStore = defineStore('ghas', () => {
 
     try {
       const repos = await listAzureRepositories(azureOrg.value, project.name, azurePat.value)
-      const hasSelectedRepo = repos.some((repo) => repo.id === selectedAzureRepoId.value)
+      const repoIdSet = new Set(repos.map((repo) => repo.id))
+      const preservedRepoIds = selectedAzureRepoIds.value.filter((repoId) => repoIdSet.has(repoId))
+      const preservedRepoRefs: Record<string, string> = {}
+
+      for (const repoId of preservedRepoIds) {
+        const existingRef = azureRepoRefs.value[repoId]?.trim()
+        if (existingRef) {
+          preservedRepoRefs[repoId] = existingRef
+          continue
+        }
+
+        const repo = repos.find((item) => item.id === repoId)
+        if (repo?.defaultBranch) {
+          preservedRepoRefs[repoId] = repo.defaultBranch
+        }
+      }
 
       azureRepos.value = repos
+      selectedAzureRepoIds.value = preservedRepoIds
+      azureRepoRefs.value = preservedRepoRefs
 
-      if (!hasSelectedRepo) {
-        selectedAzureRepoId.value = ''
+      if (preservedRepoIds.length === 0) {
         azureRef.value = ''
+      } else {
+        azureRef.value = preservedRepoRefs[preservedRepoIds[0]] ?? ''
       }
     } catch (error) {
       azureConnectionError.value = error instanceof Error ? error.message : 'Failed to load repositories.'
@@ -419,18 +445,55 @@ export const useGhasStore = defineStore('ghas', () => {
     }
   }
 
-  const selectAzureRepo = (repoId: string): void => {
-    if (repoId === selectedAzureRepoId.value) {
+  const selectAzureRepo = (repoIds: string[]): void => {
+    const normalizedRepoIds = Array.from(new Set(repoIds))
+    const previousSerialized = selectedAzureRepoIds.value.join('::')
+    const nextSerialized = normalizedRepoIds.join('::')
+    if (previousSerialized === nextSerialized) {
       return
     }
 
-    selectedAzureRepoId.value = repoId
-    const repo = azureRepos.value.find((item) => item.id === repoId)
-    azureRef.value = repo?.defaultBranch ?? ''
+    selectedAzureRepoIds.value = normalizedRepoIds
+    const nextRepoRefs: Record<string, string> = {}
+
+    for (const repoId of normalizedRepoIds) {
+      const existingRef = azureRepoRefs.value[repoId]?.trim()
+      if (existingRef) {
+        nextRepoRefs[repoId] = existingRef
+        continue
+      }
+
+      const repo = azureRepos.value.find((item) => item.id === repoId)
+      if (repo?.defaultBranch) {
+        nextRepoRefs[repoId] = repo.defaultBranch
+      }
+    }
+
+    azureRepoRefs.value = nextRepoRefs
+    const primaryRepoId = normalizedRepoIds[0]
+    azureRef.value = primaryRepoId ? nextRepoRefs[primaryRepoId] ?? '' : ''
+  }
+
+  const setAzureRepoRef = (repoId: string, nextRef: string): void => {
+    const normalizedRef = nextRef.trim()
+    const nextRepoRefs = { ...azureRepoRefs.value, [repoId]: normalizedRef }
+    azureRepoRefs.value = nextRepoRefs
+
+    const primaryRepoId = selectedAzureRepoIds.value[0]
+    if (primaryRepoId === repoId) {
+      azureRef.value = normalizedRef
+    }
   }
 
   const setAzureRef = (nextRef: string): void => {
-    azureRef.value = nextRef.trim()
+    const normalizedRef = nextRef.trim()
+    azureRef.value = normalizedRef
+    const primaryRepoId = selectedAzureRepoIds.value[0]
+    if (!primaryRepoId) return
+    azureRepoRefs.value = {
+      ...azureRepoRefs.value,
+      [primaryRepoId]: normalizedRef,
+    }
   }
 
   const clearAzureFeedback = (): void => {
@@ -444,27 +507,38 @@ export const useGhasStore = defineStore('ghas', () => {
 
   const fetchAlertsFromAzure = async (): Promise<boolean> => {
     const project = selectedAzureProject.value
-    const repo = selectedAzureRepo.value
+    const repos = selectedAzureRepos.value
 
     if (!azureOrg.value || !azurePat.value) {
       azureConnectionError.value = 'Organization and PAT are required.'
       return false
     }
-    if (!project || !repo) {
-      azureConnectionError.value = 'Select both project and repository before fetching alerts.'
+    if (!project || repos.length === 0) {
+      azureConnectionError.value = 'Select a project and at least one repository before importing alerts.'
       return false
     }
 
-    const resolvedRef = azureRef.value || repo.defaultBranch
-    if (!resolvedRef) {
-      azureConnectionError.value = 'Reference is required to fetch alerts.'
+    const repoContexts = repos.map((repo) => {
+      const configuredRef = azureRepoRefs.value[repo.id]?.trim() || ''
+      const resolvedRef = configuredRef || repo.defaultBranch || ''
+      return {
+        repo,
+        resolvedRef,
+      }
+    })
+
+    const missingRefRepos = repoContexts.filter((item) => !item.resolvedRef).map((item) => item.repo.name)
+    if (missingRefRepos.length > 0) {
+      azureConnectionError.value = `Reference is required for: ${missingRefRepos.join(', ')}`
       return false
     }
 
     azureLoadingAlerts.value = true
     isImporting.value = true
     importProgress.value = 0
-    importTotal.value = AZURE_ALERT_ENDPOINT_TOTAL + 1
+    const azureProgressStages = 3
+    const endpointTotal = AZURE_ALERT_ENDPOINT_TOTAL * repos.length
+    importTotal.value = endpointTotal + azureProgressStages
     errorMessage.value = ''
     azureConnectionError.value = ''
     importWarnings.value = []
@@ -473,30 +547,48 @@ export const useGhasStore = defineStore('ghas', () => {
     sourceSnippetCache.clear()
 
     try {
-      const response = await fetchAzureAlerts({
-        org: azureOrg.value,
-        pat: azurePat.value,
-        projectName: project.name,
-        projectId: project.id,
-        repoId: repo.id,
-        repoName: repo.name,
-        ref: resolvedRef,
-      }, (completed, total) => {
-        importTotal.value = total + 1
-        importProgress.value = completed
-      })
+      const mergedAlerts: RawGhasAlert[] = []
+      const mergedWarnings: string[] = []
 
-      importProgress.value = AZURE_ALERT_ENDPOINT_TOTAL
-      const parsed = await parseGhasFile(JSON.stringify(response.alerts))
+      for (let repoIndex = 0; repoIndex < repoContexts.length; repoIndex += 1) {
+        const { repo, resolvedRef } = repoContexts[repoIndex]
+        const completedBeforeRepo = repoIndex * AZURE_ALERT_ENDPOINT_TOTAL
+
+        const response = await fetchAzureAlerts({
+          org: azureOrg.value,
+          pat: azurePat.value,
+          projectName: project.name,
+          projectId: project.id,
+          repoId: repo.id,
+          repoName: repo.name,
+          ref: resolvedRef,
+        }, (completed) => {
+          importTotal.value = endpointTotal + azureProgressStages
+          importProgress.value = completedBeforeRepo + completed
+        })
+
+        mergedAlerts.push(...response.alerts)
+        mergedWarnings.push(...response.warnings)
+      }
+
+      importProgress.value = endpointTotal + 1
+      const parsed = await parseGhasFile(JSON.stringify(mergedAlerts))
+      importProgress.value = endpointTotal + 2
+
+      // Keep this as the final stage so progress reflects parsing + indexing work.
+      searchIndex.build(parsed.alerts)
       importProgress.value = importTotal.value
 
       alerts.value = parsed.alerts
-      searchIndex.build(parsed.alerts)
       selectedAlertId.value = null
       importWarnings.value = parsed.stats.warnings
-      azureWarnings.value = response.warnings
+      azureWarnings.value = mergedWarnings
       dataSourceMode.value = 'azure'
-      azureRef.value = resolvedRef
+      azureRepoRefs.value = {
+        ...azureRepoRefs.value,
+        ...Object.fromEntries(repoContexts.map((item) => [item.repo.id, item.resolvedRef])),
+      }
+      azureRef.value = repoContexts[0]?.resolvedRef ?? ''
       folderFileCount.value = 0
       sourceReader.disconnect()
       resetFilters()
@@ -594,12 +686,13 @@ export const useGhasStore = defineStore('ghas', () => {
     azureOrg,
     azurePat,
     azureRef,
+    azureRepoRefs,
     azureProjects,
     azureRepos,
     selectedAzureProjectId,
-    selectedAzureRepoId,
+    selectedAzureRepoIds,
     selectedAzureProject,
-    selectedAzureRepo,
+    selectedAzureRepos,
     azureLoadingProjects,
     azureLoadingRepos,
     azureLoadingAlerts,
@@ -615,6 +708,7 @@ export const useGhasStore = defineStore('ghas', () => {
     selectAzureProject,
     loadAzureRepos,
     selectAzureRepo,
+    setAzureRepoRef,
     setAzureRef,
     clearAzureFeedback,
     fetchAlertsFromAzure,
