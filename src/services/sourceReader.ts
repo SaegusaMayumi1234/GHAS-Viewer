@@ -1,4 +1,5 @@
 import type { AlertLocation } from '../types/ghas'
+import { DEFAULT_CONTEXT_RADIUS } from '../utils/snippetUtils'
 
 export interface SourceSnippet {
   resolvedPath: string
@@ -94,7 +95,7 @@ export class LocalSourceReader {
     return suffix ?? null
   }
 
-  public async readSnippet(location: AlertLocation, contextRadius = 6): Promise<SourceSnippet | null> {
+  public async readSnippet(location: AlertLocation, contextRadius = DEFAULT_CONTEXT_RADIUS): Promise<SourceSnippet | null> {
     if (!this.indexed || this.files.length === 0) {
       return null
     }

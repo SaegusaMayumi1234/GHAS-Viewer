@@ -130,5 +130,3 @@ export interface AzureRepository {
   name: string
   defaultBranch: string
 }
-
-

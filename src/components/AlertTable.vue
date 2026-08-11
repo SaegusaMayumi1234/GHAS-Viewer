@@ -2,6 +2,7 @@
 import { h, reactive } from 'vue'
 import { NButton, NDataTable, NTag, type DataTableColumns } from 'naive-ui'
 import type { NormalizedGhasAlert } from '../types/ghas'
+import { severityOrder, severityType } from '../utils/severityUtils'
 
 const props = defineProps<{
   alerts: NormalizedGhasAlert[]
@@ -11,15 +12,9 @@ const emit = defineEmits<{
   open: [alertKey: string]
 }>()
 
-const severityType = (severity: string): 'error' | 'warning' | 'success' | 'default' => {
-  if (severity === 'critical' || severity === 'high') return 'error'
-  if (severity === 'medium') return 'warning'
-  if (severity === 'low') return 'success'
-  return 'default'
-}
 
 const columns: DataTableColumns<NormalizedGhasAlert> = [
-  { title: 'ID', key: 'id', sorter: 'default', width: 72 },
+  { title: 'ID', key: 'id', sorter: 'default', width: 72, resizable: true },
   {
     title: 'Details',
     key: 'actions',
@@ -30,24 +25,35 @@ const columns: DataTableColumns<NormalizedGhasAlert> = [
   {
     title: 'Severity',
     key: 'severity',
-    sorter: 'default',
+    sorter: (a, b) => (severityOrder[a.severity] ?? 99) - (severityOrder[b.severity] ?? 99),
     width: 100,
+    resizable: true,
     render: (row) =>
       h(NTag, { type: severityType(row.severity), size: 'small' }, { default: () => row.severity }),
   },
-  { title: 'State', key: 'state', sorter: 'default', width: 96 },
-  { title: 'Repository', key: 'repositoryName', sorter: 'default', minWidth: 150 },
-  { title: 'Title', key: 'title', minWidth: 210 },
+  { title: 'State', key: 'state', sorter: 'default', width: 96, resizable: true },
+  { title: 'Repository', key: 'repositoryName', sorter: 'default', minWidth: 150, resizable: true },
+  {
+    title: 'Title',
+    key: 'title',
+    minWidth: 210,
+    resizable: true,
+    sorter: (a, b) => a.title.localeCompare(b.title),
+  },
   {
     title: 'Path',
     key: 'path',
     minWidth: 190,
+    resizable: true,
+    sorter: (a, b) => (a.locations[0]?.filePath || '').localeCompare(b.locations[0]?.filePath || ''),
     render: (row) => row.locations[0]?.filePath || '-',
   },
   {
     title: 'Tool',
     key: 'tool',
     minWidth: 120,
+    resizable: true,
+    sorter: (a, b) => a.toolNames.join(', ').localeCompare(b.toolNames.join(', ')),
     render: (row) => row.toolNames.join(', ') || '-',
   },
 ]

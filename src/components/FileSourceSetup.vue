@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { NAlert, NButton, NCard, NProgress, useMessage } from 'naive-ui'
 import { useGhasStore } from '../stores/ghasStore'
+import { calcPercent } from '../utils/snippetUtils'
 
 const store = useGhasStore()
 const {
@@ -39,9 +40,7 @@ const connectFolder = async (): Promise<void> => {
   }
 }
 
-const importPercent = computed(() =>
-  importTotal.value ? Math.round((importProgress.value / importTotal.value) * 100) : 0,
-)
+const importPercent = computed(() => calcPercent(importProgress.value, importTotal.value))
 </script>
 
 <template>
@@ -80,7 +79,7 @@ const importPercent = computed(() =>
         </div>
       </div>
     </div>
-    
+
     <p v-if="folderFileCount > 0" class="action-card__note action-card__note--ok">{{ folderFileCount }} files indexed</p>
     <p v-else class="action-card__note">Linking a folder enables source preview beside each alert.</p>
   </NCard>
@@ -109,31 +108,11 @@ const importPercent = computed(() =>
   white-space: nowrap;
 }
 
-.action-card__name {
-  margin: 0 0 6px;
-  font-size: var(--app-font-md);
-  font-weight: 700;
-}
-
-.action-card__desc {
-  margin: 0;
-  font-size: var(--app-font-sm);
-  opacity: 0.65;
-  line-height: 1.5;
-}
-
 .action-card__content {
   display: grid;
   gap: var(--app-space-2);
   margin-top: var(--app-space-2);
   grid-template-columns: repeat(2, 1fr);
-}
-
-.action-card__note {
-  margin: 6px 0 0;
-  font-size: var(--app-font-xs);
-  opacity: 0.55;
-  font-style: italic;
 }
 
 .action-card__note--ok {
@@ -148,19 +127,6 @@ const importPercent = computed(() =>
   border-radius: 10px;
   padding: var(--app-space-2);
   margin-top: var(--app-space-2);
-}
-
-.guided-step__head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: var(--app-space-1);
-  margin-bottom: var(--app-space-1);
-}
-
-.guided-step__head h4 {
-  margin: 0;
-  font-size: var(--app-font-sm);
 }
 
 .step-state {

@@ -22,6 +22,7 @@ import AlertDetailDialog from './components/AlertDetailDialog.vue'
 import LoadAlertsPanel from './components/LoadAlertsPanel.vue'
 import { useGhasStore } from './stores/ghasStore'
 import { useUiStore } from './stores/uiStore'
+import { severityColors as severityColorMap } from './utils/severityUtils'
 
 const uiStore = useUiStore()
 const { isDark } = storeToRefs(uiStore)
@@ -48,10 +49,7 @@ const severityColors: Record<string, string> = {
   filtered: '#3b82f6',
   autofixable: '#10b981',
   repos: '#06b6d4',
-  critical: '#ef4444',
-  high: '#f97316',
-  medium: '#eab308',
-  low: '#22c55e',
+  ...severityColorMap,
 }
 
 const statusCards = computed(() => {

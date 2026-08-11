@@ -5,6 +5,7 @@ import CodePreview from './CodePreview.vue'
 import MarkdownViewer from './MarkdownViewer.vue'
 import { useGhasStore } from '../stores/ghasStore'
 import { formatDateHumanly } from '../utils/dateFormatter'
+import { severityType } from '../utils/severityUtils'
 
 const store = useGhasStore()
 
@@ -19,12 +20,6 @@ const ruleDescriptions = computed(() => store.selectedAlert?.ruleDescriptions ||
 const primaryLocation = computed(() => store.selectedAlert?.locations[0] ?? null)
 const logicalLocations = computed(() => store.selectedAlert?.logicalLocations ?? [])
 
-const severityType = (severity: string): 'error' | 'warning' | 'success' | 'default' => {
-  if (severity === 'critical' || severity === 'high') return 'error'
-  if (severity === 'medium') return 'warning'
-  if (severity === 'low') return 'success'
-  return 'default'
-}
 
 const formatLocationKind = (kind: string | undefined): string => {
   if (!kind) return 'Location'

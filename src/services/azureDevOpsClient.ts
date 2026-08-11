@@ -1,5 +1,6 @@
 import type { AlertLocation, AzureProject, AzureRepository, RawGhasAlert } from '../types/ghas'
 import type { SourceSnippet } from './sourceReader'
+import { DEFAULT_CONTEXT_RADIUS } from '../utils/snippetUtils'
 
 interface AzureListResponse<T> {
   value?: T[]
@@ -28,6 +29,10 @@ interface AzureSourceContext {
   ref: string
   fallbackRef?: string
 }
+
+const API_VERSION_PROJECTS = '7.1-preview.4'
+const API_VERSION_REPOSITORIES = '7.1-preview.1'
+const API_VERSION_ITEMS = '7.1-preview.1'
 
 const ALERT_TYPES: Array<{ label: string; value: number }> = [
   { label: 'code', value: 3 },
@@ -133,7 +138,7 @@ const requestJsonWithContinuation = async <T>(
 }
 
 export const listAzureProjects = async (org: string, pat: string): Promise<AzureProject[]> => {
-  const url = `https://dev.azure.com/${encodeURIComponent(org)}/_apis/projects?api-version=7.1-preview.4`
+  const url = `https://dev.azure.com/${encodeURIComponent(org)}/_apis/projects?api-version=${API_VERSION_PROJECTS}`
   const json = await requestJson<AzureListResponse<{ id?: string; name?: string }>>(url, pat)
 
   return (json.value ?? [])
@@ -149,7 +154,7 @@ export const listAzureRepositories = async (
   projectName: string,
   pat: string,
 ): Promise<AzureRepository[]> => {
-  const url = `https://dev.azure.com/${encodeURIComponent(org)}/${encodeURIComponent(projectName)}/_apis/git/repositories?api-version=7.1-preview.1`
+  const url = `https://dev.azure.com/${encodeURIComponent(org)}/${encodeURIComponent(projectName)}/_apis/git/repositories?api-version=${API_VERSION_REPOSITORIES}`
   const json = await requestJson<
     AzureListResponse<{ id?: string; name?: string; defaultBranch?: string }>
   >(url, pat)
@@ -319,7 +324,7 @@ export const fetchAzureSourceText = async (context: AzureSourceContext): Promise
       includeContent: 'true',
       'versionDescriptor.version': ref,
       'versionDescriptor.versionOptions': 'none',
-      'api-version': '7.1-preview.1',
+      'api-version': API_VERSION_ITEMS,
     })
 
     const url = `https://dev.azure.com/${encodeURIComponent(context.org)}/${encodeURIComponent(context.project)}/_apis/git/repositories/${encodeURIComponent(context.repoId)}/items?${params.toString()}`
@@ -361,7 +366,7 @@ export const buildSourceSnippet = (
   filePath: string,
   content: string,
   location: AlertLocation,
-  contextRadius = 6,
+  contextRadius = DEFAULT_CONTEXT_RADIUS,
 ): SourceSnippet => {
   const allLines = content.split(/\r?\n/)
   const focusLine = Math.max(location.lineStart ?? 1, 1)

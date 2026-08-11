@@ -13,6 +13,7 @@ import {
   NSelect,
 } from 'naive-ui'
 import { useGhasStore } from '../stores/ghasStore'
+import { calcPercent } from '../utils/snippetUtils'
 
 const store = useGhasStore()
 const {
@@ -136,9 +137,7 @@ const azureReposStatus = computed(() => {
   return 'Select project first'
 })
 
-const azureProgressPercent = computed(() =>
-  importTotal.value ? Math.round((importProgress.value / importTotal.value) * 100) : 0,
-)
+const azureProgressPercent = computed(() => calcPercent(importProgress.value, importTotal.value))
 
 const azureHasSuccess = computed(() =>
   dataSourceMode.value === 'azure' &&
@@ -391,49 +390,10 @@ const closeProgressModal = (): void => {
 </template>
 
 <style scoped>
-.action-card__name {
-  margin: 0 0 6px;
-  font-size: var(--app-font-md);
-  font-weight: 700;
-}
-
-.action-card__desc {
-  margin: 0;
-  font-size: var(--app-font-sm);
-  opacity: 0.65;
-  line-height: 1.5;
-}
-
-.action-card__note {
-  margin: 6px 0 0;
-  font-size: var(--app-font-xs);
-  opacity: 0.55;
-  font-style: italic;
-}
-
 .azure-inline-form {
   margin-top: var(--app-space-2);
   display: grid;
   gap: var(--app-space-2);
-}
-
-.guided-step {
-  border: 1px solid rgba(128, 128, 128, 0.22);
-  border-radius: 10px;
-  padding: var(--app-space-2);
-}
-
-.guided-step__head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: var(--app-space-1);
-  margin-bottom: var(--app-space-1);
-}
-
-.guided-step__head h4 {
-  margin: 0;
-  font-size: var(--app-font-sm);
 }
 
 .step-state {
@@ -477,13 +437,6 @@ const closeProgressModal = (): void => {
   max-height: 160px;
   overflow-y: auto;
   margin-top: 10px;
-}
-
-.dialog-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: var(--app-space-1);
-  flex-wrap: wrap;
 }
 
 @media (max-width: 740px) {

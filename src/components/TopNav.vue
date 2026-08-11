@@ -27,7 +27,7 @@ const repositoryUrl = computed((): string => {
   <header class="top-nav">
     <div class="top-nav__brand">
       <div class="top-nav__glyph" aria-hidden="true">
-        <NIcon size="18" color="#2080f0"><ShieldCheck /></NIcon>
+        <NIcon size="18" color="var(--color-azure)"><ShieldCheck /></NIcon>
       </div>
       <div class="top-nav__title-wrap">
         <p class="top-nav__kicker">GitHub Advanced Security</p>
@@ -90,7 +90,7 @@ const repositoryUrl = computed((): string => {
   height: 2.2rem;
   border-radius: 8px;
   border: 1px solid rgba(32, 128, 240, 0.3);
-  background: rgba(32, 128, 240, 0.08);
+  background: var(--color-azure-subtle);
   flex-shrink: 0;
 }
 

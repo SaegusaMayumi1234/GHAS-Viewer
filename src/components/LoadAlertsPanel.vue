@@ -79,7 +79,7 @@ const cancelSourceSelection = (): void => {
         <label class="source-choice-card" :class="{ 'source-choice-card--active': sourceChoice === 'azure' }">
           <div class="source-choice-head">
             <NRadio value="azure" />
-            <NIcon size="24" color="#2080f0"><Cloud /></NIcon>
+            <NIcon size="24" color="var(--color-azure)"><Cloud /></NIcon>
           </div>
           <h3 class="action-card__name">Connect Azure DevOps</h3>
           <p class="action-card__desc">Import alerts from Azure DevOps using organization, project, repositories, and branch/ref settings.</p>
@@ -88,7 +88,7 @@ const cancelSourceSelection = (): void => {
         <label class="source-choice-card" :class="{ 'source-choice-card--active': sourceChoice === 'file' }">
           <div class="source-choice-head">
             <NRadio value="file" />
-            <NIcon size="24" color="#2080f0"><FileCode /></NIcon>
+            <NIcon size="24" color="var(--color-azure)"><FileCode /></NIcon>
           </div>
           <h3 class="action-card__name">Import from JSON File</h3>
           <p class="action-card__desc">Import local GHAS JSON and optionally link your project folder for source preview.</p>
@@ -134,19 +134,6 @@ const cancelSourceSelection = (): void => {
   gap: var(--app-space-2);
 }
 
-.action-card__name {
-  margin: 0 0 6px;
-  font-size: var(--app-font-md);
-  font-weight: 700;
-}
-
-.action-card__desc {
-  margin: 0;
-  font-size: var(--app-font-sm);
-  opacity: 0.65;
-  line-height: 1.5;
-}
-
 .source-choice-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -176,13 +163,6 @@ const cancelSourceSelection = (): void => {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 8px;
-}
-
-.dialog-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  flex-wrap: wrap;
 }
 
 @media (max-width: 740px) {

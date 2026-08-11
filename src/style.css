@@ -24,3 +24,57 @@ body {
   font-size: var(--app-font-sm);
   -webkit-text-size-adjust: 100%;
 }
+
+/* ── Shared color tokens ── */
+:root {
+  --color-azure: #2080f0;
+  --color-azure-subtle: rgba(32, 128, 240, 0.08);
+  --color-azure-subtle-hover: rgba(32, 128, 240, 0.15);
+}
+
+/* ── Shared action-card / guided-step / dialog-actions ── */
+.action-card__name {
+  margin: 0 0 6px;
+  font-size: var(--app-font-md);
+  font-weight: 700;
+}
+
+.action-card__desc {
+  margin: 0;
+  font-size: var(--app-font-sm);
+  opacity: 0.65;
+  line-height: 1.5;
+}
+
+.action-card__note {
+  margin: 6px 0 0;
+  font-size: var(--app-font-xs);
+  opacity: 0.55;
+  font-style: italic;
+}
+
+.guided-step {
+  border: 1px solid rgba(128, 128, 128, 0.22);
+  border-radius: 10px;
+  padding: var(--app-space-2);
+}
+
+.guided-step__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--app-space-1);
+  margin-bottom: var(--app-space-1);
+}
+
+.guided-step__head h4 {
+  margin: 0;
+  font-size: var(--app-font-sm);
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--app-space-1);
+  flex-wrap: wrap;
+}
