@@ -399,7 +399,7 @@ const closeProgressModal = (): void => {
 .step-state {
   display: inline-flex;
   align-items: center;
-  border: 1px solid rgba(128, 128, 128, 0.34);
+  border: 1px solid var(--app-border);
   border-radius: 999px;
   padding: 2px 8px;
   font-size: var(--app-font-xs);

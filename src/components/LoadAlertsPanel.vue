@@ -59,7 +59,7 @@ const cancelSourceSelection = (): void => {
       </div>
 
       <NCard v-if="stats.totalImported > 0" size="small" embedded>
-        <NIcon size="24" color="#d03050" style="margin-bottom: 8px"><Trash /></NIcon>
+        <NIcon size="24" color="var(--app-color-danger)" style="margin-bottom: 8px"><Trash /></NIcon>
         <h3 class="action-card__name">Reset Imported Alerts</h3>
         <p class="action-card__desc">Remove all {{ stats.totalImported }} imported alerts and reset filters.</p>
         <NButton type="error" block style="margin-top: 12px" @click="store.clearAlerts()">Reset Alerts</NButton>
@@ -79,7 +79,7 @@ const cancelSourceSelection = (): void => {
         <label class="source-choice-card" :class="{ 'source-choice-card--active': sourceChoice === 'azure' }">
           <div class="source-choice-head">
             <NRadio value="azure" />
-            <NIcon size="24" color="var(--color-azure)"><Cloud /></NIcon>
+            <NIcon size="24" color="var(--app-color-azure)"><Cloud /></NIcon>
           </div>
           <h3 class="action-card__name">Connect Azure DevOps</h3>
           <p class="action-card__desc">Import alerts from Azure DevOps using organization, project, repositories, and branch/ref settings.</p>
@@ -88,7 +88,7 @@ const cancelSourceSelection = (): void => {
         <label class="source-choice-card" :class="{ 'source-choice-card--active': sourceChoice === 'file' }">
           <div class="source-choice-head">
             <NRadio value="file" />
-            <NIcon size="24" color="var(--color-azure)"><FileCode /></NIcon>
+            <NIcon size="24" color="var(--app-color-azure)"><FileCode /></NIcon>
           </div>
           <h3 class="action-card__name">Import from JSON File</h3>
           <p class="action-card__desc">Import local GHAS JSON and optionally link your project folder for source preview.</p>
@@ -141,7 +141,7 @@ const cancelSourceSelection = (): void => {
 }
 
 .source-choice-card {
-  border: 1px solid rgba(128, 128, 128, 0.22);
+  border: 1px solid var(--app-border);
   border-radius: 12px;
   padding: var(--app-space-2);
   display: block;
@@ -150,12 +150,12 @@ const cancelSourceSelection = (): void => {
 }
 
 .source-choice-card:hover {
-  border-color: rgba(32, 128, 240, 0.7);
+  border-color: var(--app-color-azure);
 }
 
 .source-choice-card--active {
-  border-color: #2080f0;
-  box-shadow: 0 0 0 1px rgba(32, 128, 240, 0.35);
+  border-color: var(--app-color-azure);
+  box-shadow: 0 0 0 1px var(--app-color-azure-hover);
 }
 
 .source-choice-head {

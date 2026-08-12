@@ -197,8 +197,8 @@ const formatDateLabel = (value: string): string => {
 }
 
 .dep-chain__node--rootDependency {
-  border-color: rgba(32, 128, 240, 0.5);
-  background: rgba(32, 128, 240, 0.06);
+  border-color: var(--app-color-azure);
+  background: var(--app-color-azure-soft);
 }
 
 .dep-chain__name {

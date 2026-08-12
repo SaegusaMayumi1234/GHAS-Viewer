@@ -11,6 +11,46 @@
   --app-font-sm: clamp(0.8rem, 2.2vw, 0.88rem);
   --app-font-md: clamp(0.9rem, 2.5vw, 1.02rem);
   --app-font-lg: clamp(1rem, 2.8vw, 1.2rem);
+
+  --app-page-background: #edf3f8;
+  --app-page-background-end: #e4ecf4;
+  --app-surface: #ffffff;
+  --app-surface-raised: #f7fafc;
+  --app-surface-muted: #eef4f8;
+  --app-border: #c9d6e2;
+  --app-divider: #dbe5ed;
+  --app-text-muted: #526579;
+  --app-code-background: #f1f5f8;
+  --app-color-azure: #1769c2;
+  --app-color-azure-soft: rgba(23, 105, 194, 0.1);
+  --app-color-azure-hover: rgba(23, 105, 194, 0.18);
+  --app-color-success: #16804d;
+  --app-color-danger: #c43d55;
+  --app-color-loaded: #7655c7;
+  --app-color-filtered: #2875c7;
+  --app-color-autofixable: #16804d;
+  --app-color-repos: #087f9b;
+}
+
+.app-shell.app-theme--dark {
+  --app-page-background: #071525;
+  --app-page-background-end: #000000;
+  --app-surface: #0d1b2c;
+  --app-surface-raised: #12243a;
+  --app-surface-muted: #102238;
+  --app-border: #29415c;
+  --app-divider: #1d344d;
+  --app-text-muted: #aabbd0;
+  --app-code-background: #081421;
+  --app-color-azure: #69b7ff;
+  --app-color-azure-soft: rgba(105, 183, 255, 0.13);
+  --app-color-azure-hover: rgba(105, 183, 255, 0.22);
+  --app-color-success: #4ed391;
+  --app-color-danger: #ff7087;
+  --app-color-loaded: #b69bff;
+  --app-color-filtered: #69a9ff;
+  --app-color-autofixable: #4ed391;
+  --app-color-repos: #48d0e8;
 }
 
 html,
@@ -23,13 +63,6 @@ body {
   margin: 0;
   font-size: var(--app-font-sm);
   -webkit-text-size-adjust: 100%;
-}
-
-/* ── Shared color tokens ── */
-:root {
-  --color-azure: #2080f0;
-  --color-azure-subtle: rgba(32, 128, 240, 0.08);
-  --color-azure-subtle-hover: rgba(32, 128, 240, 0.15);
 }
 
 /* ── Shared action-card / guided-step / dialog-actions ── */
@@ -54,7 +87,7 @@ body {
 }
 
 .guided-step {
-  border: 1px solid rgba(128, 128, 128, 0.22);
+  border: 1px solid var(--app-border);
   border-radius: 10px;
   padding: var(--app-space-2);
 }

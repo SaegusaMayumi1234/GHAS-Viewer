@@ -116,14 +116,14 @@ const importPercent = computed(() => calcPercent(importProgress.value, importTot
 }
 
 .action-card__note--ok {
-  color: #18a058;
+  color: var(--app-color-success);
   opacity: 1;
   font-style: normal;
   font-weight: 600;
 }
 
 .guided-step {
-  border: 1px solid rgba(128, 128, 128, 0.22);
+  border: 1px solid var(--app-border);
   border-radius: 10px;
   padding: var(--app-space-2);
   margin-top: var(--app-space-2);
@@ -132,7 +132,7 @@ const importPercent = computed(() => calcPercent(importProgress.value, importTot
 .step-state {
   display: inline-flex;
   align-items: center;
-  border: 1px solid rgba(128, 128, 128, 0.34);
+  border: 1px solid var(--app-border);
   border-radius: 999px;
   padding: 2px 8px;
   font-size: var(--app-font-xs);
@@ -141,8 +141,8 @@ const importPercent = computed(() => calcPercent(importProgress.value, importTot
 }
 
 .step-state--ok {
-  color: #18a058;
-  border-color: rgba(24, 160, 88, 0.45);
+  color: var(--app-color-success);
+  border-color: var(--app-color-success);
 }
 
 .file-actions {
