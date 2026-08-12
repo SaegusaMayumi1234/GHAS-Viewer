@@ -1,10 +1,14 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
-import { NButton, NCheckbox, NInput, NSelect } from 'naive-ui'
+import { NButton, NCheckbox, NInput, NSelect, useThemeVars } from 'naive-ui'
 import { useGhasStore } from '../stores/ghasStore'
 
 const store = useGhasStore()
 const { filters, severityOptions, stateOptions, repositoryOptions, toolOptions, globalSearch } = storeToRefs(store)
+
+const themeVars = useThemeVars()
+const cardColor = computed(() => themeVars.value.cardColor)
 
 const toOptions = (values: string[]) => [
   { label: 'All', value: '' },
@@ -105,6 +109,10 @@ const toMultiOptions = (values: string[]) => values.map((v) => ({ label: v, valu
   display: flex;
   flex-direction: column;
   gap: var(--app-space-2);
+  background: v-bind(cardColor);
+  border: 1px solid var(--app-border-soft);
+  border-radius: 12px;
+  padding: var(--app-space-3);
 }
 
 .filter-panel__head h2 {
@@ -114,7 +122,7 @@ const toMultiOptions = (values: string[]) => values.map((v) => ({ label: v, valu
 
 .filter-panel__head p {
   margin: 2px 0 0;
-  opacity: 0.6;
+  opacity: 0.68;
   font-size: var(--app-font-sm);
 }
 
@@ -164,7 +172,7 @@ const toMultiOptions = (values: string[]) => values.map((v) => ({ label: v, valu
 
 .field > label {
   font-size: var(--app-font-xs);
-  opacity: 0.6;
+  opacity: 0.65;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;

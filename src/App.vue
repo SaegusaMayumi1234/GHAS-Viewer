@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, watchEffect } from 'vue'
 import { storeToRefs } from 'pinia'
 import {
   NButton,
@@ -27,17 +27,60 @@ import { severityColors as severityColorMap } from './utils/severityUtils'
 const uiStore = useUiStore()
 const { isDark } = storeToRefs(uiStore)
 
-const themeOverrides: GlobalThemeOverrides = {
+// Toggle a `.dark` class on <body> so plain-CSS tokens in style.css track
+// the same light/dark state as the Naive UI theme.
+watchEffect(() => {
+  document.body.classList.toggle('dark', isDark.value)
+})
+
+const lightOverrides: GlobalThemeOverrides = {
   common: {
     fontFamily: 'Lato, sans-serif',
     fontFamilyMono: '"Fira Code", monospace',
+    primaryColor: '#2f6fed',
+    primaryColorHover: '#1d5fe0',
+    primaryColorPressed: '#1650c2',
+    primaryColorSuppl: '#2f6fed',
+    successColor: '#15803d',
+    successColorHover: '#166534',
+    warningColor: '#b45309',
+    warningColorHover: '#92400e',
+    errorColor: '#dc2626',
+    errorColorHover: '#b91c1c',
+    bodyColor: '#eef1f6',
+    cardColor: '#ffffff',
+    borderColor: 'rgba(15, 23, 42, 0.12)',
+    dividerColor: 'rgba(15, 23, 42, 0.09)',
   },
 }
+
+const darkOverrides: GlobalThemeOverrides = {
+  common: {
+    fontFamily: 'Lato, sans-serif',
+    fontFamilyMono: '"Fira Code", monospace',
+    primaryColor: '#5b9dff',
+    primaryColorHover: '#7bb0ff',
+    primaryColorPressed: '#4a89e6',
+    primaryColorSuppl: '#5b9dff',
+    successColor: '#4ade80',
+    successColorHover: '#6ee7a0',
+    warningColor: '#fbbf24',
+    warningColorHover: '#fcd34d',
+    errorColor: '#f87171',
+    errorColorHover: '#fca5a5',
+    bodyColor: '#14181f',
+    cardColor: '#1c212b',
+    borderColor: 'rgba(255, 255, 255, 0.11)',
+    dividerColor: 'rgba(255, 255, 255, 0.08)',
+  },
+}
+
+const themeOverrides = computed(() => (isDark.value ? darkOverrides : lightOverrides))
 
 const { message } = createDiscreteApi(['message'], {
   configProviderProps: computed(() => ({
     theme: isDark.value ? darkTheme : null,
-    themeOverrides,
+    themeOverrides: themeOverrides.value,
   })),
 })
 
@@ -45,10 +88,10 @@ const store = useGhasStore()
 const { filteredAlerts, stats } = storeToRefs(store)
 
 const severityColors: Record<string, string> = {
-  loaded: '#9061f9',
-  filtered: '#3b82f6',
-  autofixable: '#10b981',
-  repos: '#06b6d4',
+  loaded: 'var(--status-loaded)',
+  filtered: 'var(--status-filtered)',
+  autofixable: 'var(--status-autofixable)',
+  repos: 'var(--status-repos)',
   ...severityColorMap,
 }
 
@@ -150,6 +193,21 @@ const exportJson = (): void => {
 
 .status-card {
   height: 100%;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.status-card:hover {
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.1);
+  transform: translateY(-1px);
+}
+
+.dark .status-card {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.dark .status-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
 .status-card .n-statistic-value {
@@ -169,6 +227,8 @@ const exportJson = (): void => {
   justify-content: space-between;
   align-items: center;
   gap: var(--app-space-2);
+  padding-top: var(--app-space-1);
+  border-top: 1px solid var(--app-border-soft);
 }
 
 .alert-explorer-head h2 {
@@ -179,7 +239,7 @@ const exportJson = (): void => {
 .alert-explorer-head p {
   margin: 3px 0 0;
   font-size: var(--app-font-sm);
-  opacity: 0.6;
+  opacity: 0.68;
 }
 
 @media (max-width: 740px) {

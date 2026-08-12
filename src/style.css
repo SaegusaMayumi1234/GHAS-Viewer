@@ -27,9 +27,54 @@ body {
 
 /* ── Shared color tokens ── */
 :root {
-  --color-azure: #2080f0;
-  --color-azure-subtle: rgba(32, 128, 240, 0.08);
-  --color-azure-subtle-hover: rgba(32, 128, 240, 0.15);
+  --color-azure: #2f6fed;
+  --color-azure-subtle: rgba(47, 111, 237, 0.08);
+  --color-azure-subtle-hover: rgba(47, 111, 237, 0.16);
+
+  /* Page background sits a step away from card surfaces so sections read
+     as distinct without needing heavy borders everywhere. */
+  --app-page-bg: #eef1f6;
+  --app-border-soft: rgba(15, 23, 42, 0.1);
+  --app-border-strong: rgba(15, 23, 42, 0.16);
+
+  --color-success: #15803d;
+  --color-success-subtle: rgba(21, 128, 61, 0.1);
+  --color-warning: #b45309;
+  --color-warning-subtle: rgba(180, 83, 9, 0.1);
+  --color-danger: #dc2626;
+  --color-danger-subtle: rgba(220, 38, 38, 0.1);
+
+  --status-loaded: #7c3aed;
+  --status-filtered: #2f6fed;
+  --status-autofixable: #0d9488;
+  --status-repos: #0891b2;
+}
+
+.dark {
+  --app-page-bg: #14181f;
+  --app-border-soft: rgba(255, 255, 255, 0.09);
+  --app-border-strong: rgba(255, 255, 255, 0.16);
+
+  --color-azure: #5b9dff;
+  --color-azure-subtle: rgba(91, 157, 255, 0.12);
+  --color-azure-subtle-hover: rgba(91, 157, 255, 0.2);
+
+  --color-success: #4ade80;
+  --color-success-subtle: rgba(74, 222, 128, 0.14);
+  --color-warning: #fbbf24;
+  --color-warning-subtle: rgba(251, 191, 36, 0.14);
+  --color-danger: #f87171;
+  --color-danger-subtle: rgba(248, 113, 113, 0.14);
+
+  --status-loaded: #a78bfa;
+  --status-filtered: #5b9dff;
+  --status-autofixable: #2dd4bf;
+  --status-repos: #38bdf8;
+}
+
+body {
+  background: var(--app-page-bg);
+  transition: background-color 0.2s ease;
 }
 
 /* ── Shared action-card / guided-step / dialog-actions ── */
@@ -42,19 +87,19 @@ body {
 .action-card__desc {
   margin: 0;
   font-size: var(--app-font-sm);
-  opacity: 0.65;
+  opacity: 0.72;
   line-height: 1.5;
 }
 
 .action-card__note {
   margin: 6px 0 0;
   font-size: var(--app-font-xs);
-  opacity: 0.55;
+  opacity: 0.62;
   font-style: italic;
 }
 
 .guided-step {
-  border: 1px solid rgba(128, 128, 128, 0.22);
+  border: 1px solid var(--app-border-soft);
   border-radius: 10px;
   padding: var(--app-space-2);
 }

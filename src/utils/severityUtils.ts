@@ -9,10 +9,10 @@ export const severityOrder: Record<string, number> = {
 }
 
 export const severityColors: Record<string, string> = {
-  critical: '#ef4444',
-  high: '#f97316',
-  medium: '#eab308',
-  low: '#22c55e',
+  critical: 'var(--color-danger)',
+  high: '#ea580c',
+  medium: 'var(--color-warning)',
+  low: 'var(--color-success)',
 }
 
 export const severityType = (

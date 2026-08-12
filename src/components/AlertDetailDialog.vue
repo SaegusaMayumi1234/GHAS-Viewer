@@ -144,7 +144,7 @@ const formatDateLabel = (value: string): string => {
 
 .detail-head p {
   margin: 4px 0 0;
-  opacity: 0.6;
+  opacity: 0.68;
   font-size: 0.85rem;
 }
 
@@ -197,8 +197,8 @@ const formatDateLabel = (value: string): string => {
 }
 
 .dep-chain__node--rootDependency {
-  border-color: rgba(32, 128, 240, 0.5);
-  background: rgba(32, 128, 240, 0.06);
+  border-color: var(--color-azure);
+  background: var(--color-azure-subtle);
 }
 
 .dep-chain__name {

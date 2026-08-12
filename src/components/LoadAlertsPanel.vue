@@ -59,7 +59,7 @@ const cancelSourceSelection = (): void => {
       </div>
 
       <NCard v-if="stats.totalImported > 0" size="small" embedded>
-        <NIcon size="24" color="#d03050" style="margin-bottom: 8px"><Trash /></NIcon>
+        <NIcon size="24" color="var(--color-danger)" style="margin-bottom: 8px"><Trash /></NIcon>
         <h3 class="action-card__name">Reset Imported Alerts</h3>
         <p class="action-card__desc">Remove all {{ stats.totalImported }} imported alerts and reset filters.</p>
         <NButton type="error" block style="margin-top: 12px" @click="store.clearAlerts()">Reset Alerts</NButton>
@@ -125,7 +125,7 @@ const cancelSourceSelection = (): void => {
 
 .load-panel__head p {
   margin: 2px 0 0;
-  opacity: 0.6;
+  opacity: 0.68;
   font-size: var(--app-font-sm);
 }
 
@@ -141,21 +141,23 @@ const cancelSourceSelection = (): void => {
 }
 
 .source-choice-card {
-  border: 1px solid rgba(128, 128, 128, 0.22);
+  border: 1px solid var(--app-border-soft);
   border-radius: 12px;
   padding: var(--app-space-2);
   display: block;
   cursor: pointer;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
 .source-choice-card:hover {
-  border-color: rgba(32, 128, 240, 0.7);
+  border-color: var(--color-azure);
+  background: var(--color-azure-subtle);
 }
 
 .source-choice-card--active {
-  border-color: #2080f0;
-  box-shadow: 0 0 0 1px rgba(32, 128, 240, 0.35);
+  border-color: var(--color-azure);
+  background: var(--color-azure-subtle);
+  box-shadow: 0 0 0 1px var(--color-azure);
 }
 
 .source-choice-head {

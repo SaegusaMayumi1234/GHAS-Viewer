@@ -102,11 +102,12 @@ const repositoryUrl = computed((): string => {
 
 .top-nav__kicker {
   margin: 0;
-  opacity: 0.5;
+  opacity: 0.6;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   font-size: var(--app-font-xs);
   font-weight: 700;
+  color: var(--color-azure);
 }
 
 .top-nav__title-wrap h1 {
@@ -125,7 +126,7 @@ const repositoryUrl = computed((): string => {
 }
 
 .top-nav__mode-label {
-  opacity: 0.55;
+  opacity: 0.65;
   font-size: var(--app-font-sm);
   font-weight: 600;
 }
