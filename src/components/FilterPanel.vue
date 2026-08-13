@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { NButton, NCheckbox, NInput, NSelect } from 'naive-ui'
+import { NCard, NButton, NCheckbox, NInput, NSelect } from 'naive-ui'
 import { useGhasStore } from '../stores/ghasStore'
 
 const store = useGhasStore()
@@ -15,89 +15,91 @@ const toMultiOptions = (values: string[]) => values.map((v) => ({ label: v, valu
 </script>
 
 <template>
-  <div class="filter-panel">
-    <div class="filter-panel__head">
-      <div>
-        <h2>Filters</h2>
-        <p>Refine alerts by severity, state, repository, tool, and query fields.</p>
+  <NCard>
+    <div class="filter-panel">
+      <div class="filter-panel__head">
+        <div>
+          <h2>Filters</h2>
+          <p>Refine alerts by severity, state, repository, tool, and query fields.</p>
+        </div>
+      </div>
+
+      <div class="filter-grid">
+        <div class="field field--full">
+          <label>Search Any Field</label>
+          <NInput
+            v-model:value="globalSearch"
+            placeholder="Search title, rule, CWE, file path, commit hash, repository, help text..."
+            clearable
+          />
+        </div>
+
+        <div class="field">
+          <label>Severity</label>
+          <NSelect
+            v-model:value="filters.severities"
+            :options="toMultiOptions(severityOptions)"
+            multiple
+            clearable
+            placeholder="All severities"
+          />
+        </div>
+
+        <div class="field">
+          <label>State</label>
+          <NSelect
+            v-model:value="filters.states"
+            :options="toMultiOptions(stateOptions)"
+            multiple
+            clearable
+            placeholder="All states"
+          />
+        </div>
+
+        <div class="field">
+          <label>Repository</label>
+          <NSelect
+            v-model:value="filters.repositoryName"
+            :options="toOptions(repositoryOptions)"
+            placeholder="All"
+          />
+        </div>
+
+        <div class="field">
+          <label>Tool</label>
+          <NSelect
+            v-model:value="filters.toolName"
+            :options="toOptions(toolOptions)"
+            placeholder="All"
+          />
+        </div>
+
+        <div class="field">
+          <label>Alert ID</label>
+          <NInput v-model:value="filters.alertIdQuery" placeholder="contains id..." clearable />
+        </div>
+
+        <div class="field">
+          <label>Rule</label>
+          <NInput v-model:value="filters.ruleQuery" placeholder="rule id or name..." clearable />
+        </div>
+
+        <div class="field">
+          <label>Path</label>
+          <NInput v-model:value="filters.pathQuery" placeholder="file path contains..." clearable />
+        </div>
+
+        <div class="field field--checkboxes">
+          <NCheckbox v-model:checked="filters.onlyAutofixable">Only auto-fixable</NCheckbox>
+          <NCheckbox v-model:checked="filters.hideDuplicateAlerts">Hide duplicate alerts</NCheckbox>
+        </div>
+
+        <div class="field field--actions">
+          <NButton @click="store.resetFilters">Reset all filters</NButton>
+        </div>
       </div>
     </div>
-
-    <div class="filter-grid">
-      <div class="field field--full">
-        <label>Search Any Field</label>
-        <NInput
-          v-model:value="globalSearch"
-          placeholder="Search title, rule, CWE, file path, commit hash, repository, help text..."
-          clearable
-        />
-      </div>
-
-      <div class="field">
-        <label>Severity</label>
-        <NSelect
-          v-model:value="filters.severities"
-          :options="toMultiOptions(severityOptions)"
-          multiple
-          clearable
-          placeholder="All severities"
-        />
-      </div>
-
-      <div class="field">
-        <label>State</label>
-        <NSelect
-          v-model:value="filters.states"
-          :options="toMultiOptions(stateOptions)"
-          multiple
-          clearable
-          placeholder="All states"
-        />
-      </div>
-
-      <div class="field">
-        <label>Repository</label>
-        <NSelect
-          v-model:value="filters.repositoryName"
-          :options="toOptions(repositoryOptions)"
-          placeholder="All"
-        />
-      </div>
-
-      <div class="field">
-        <label>Tool</label>
-        <NSelect
-          v-model:value="filters.toolName"
-          :options="toOptions(toolOptions)"
-          placeholder="All"
-        />
-      </div>
-
-      <div class="field">
-        <label>Alert ID</label>
-        <NInput v-model:value="filters.alertIdQuery" placeholder="contains id..." clearable />
-      </div>
-
-      <div class="field">
-        <label>Rule</label>
-        <NInput v-model:value="filters.ruleQuery" placeholder="rule id or name..." clearable />
-      </div>
-
-      <div class="field">
-        <label>Path</label>
-        <NInput v-model:value="filters.pathQuery" placeholder="file path contains..." clearable />
-      </div>
-
-      <div class="field field--checkboxes">
-        <NCheckbox v-model:checked="filters.onlyAutofixable">Only auto-fixable</NCheckbox>
-        <NCheckbox v-model:checked="filters.hideDuplicateAlerts">Hide duplicate alerts</NCheckbox>
-      </div>
-
-      <div class="field field--actions">
-        <NButton @click="store.resetFilters">Reset all filters</NButton>
-      </div>
-    </div>
-  </div>
+  </NCard>
 </template>
 
 <style scoped>
