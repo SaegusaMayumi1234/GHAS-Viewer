@@ -74,6 +74,12 @@ const splitFocusLine = (
   font-size: 0.82rem;
 }
 
+.code-preview__content > code {
+  display: block;
+  width: max-content;
+  min-width: 100%;
+}
+
 .code-preview__content .line-number {
   display: inline-block;
   width: 4.2rem;
