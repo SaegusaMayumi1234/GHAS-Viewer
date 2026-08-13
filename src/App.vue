@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import {
   NButton,
@@ -26,6 +26,10 @@ import { severityColors as severityColorMap } from './utils/severityUtils'
 
 const uiStore = useUiStore()
 const { isDark } = storeToRefs(uiStore)
+
+watch(isDark, (dark) => {
+  document.documentElement.dataset.appTheme = dark ? 'dark' : 'light'
+}, { immediate: true })
 
 const themeOverrides = computed<GlobalThemeOverrides>(() => ({
   common: {
@@ -232,6 +236,8 @@ const exportJson = (): void => {
   justify-content: space-between;
   align-items: center;
   gap: var(--app-space-2);
+  padding-top: var(--app-space-1);
+  border-top: 1px solid var(--app-divider);
 }
 
 .alert-explorer-head h2 {

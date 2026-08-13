@@ -32,7 +32,7 @@
   --app-color-repos: #087f9b;
 }
 
-.app-shell.app-theme--dark {
+:root[data-app-theme='dark'] {
   --app-page-background: #071525;
   --app-page-background-end: #000000;
   --app-surface: #0d1b2c;
