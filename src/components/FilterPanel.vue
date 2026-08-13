@@ -1,206 +1,190 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import Button from 'primevue/button'
-import Checkbox from 'primevue/checkbox'
-import InputText from 'primevue/inputtext'
-import MultiSelect from 'primevue/multiselect'
-import Select from 'primevue/select'
+import { NCard, NButton, NCheckbox, NInput, NSelect } from 'naive-ui'
 import { useGhasStore } from '../stores/ghasStore'
 
 const store = useGhasStore()
 const { filters, severityOptions, stateOptions, repositoryOptions, toolOptions, globalSearch } = storeToRefs(store)
 
-const toSelectOptions = (values: string[]) => [
+const toOptions = (values: string[]) => [
   { label: 'All', value: '' },
-  ...values.map((value) => ({ label: value, value })),
+  ...values.map((v) => ({ label: v, value: v })),
 ]
+
+const toMultiOptions = (values: string[]) => values.map((v) => ({ label: v, value: v }))
 </script>
 
 <template>
-  <section class="filter-panel">
-    <header class="filter-panel__head">
-      <div>
-        <h2>Filters</h2>
-        <p>Refine alerts by severity, state, repository, tool, and query fields.</p>
-      </div>
-    </header>
-
-    <div class="filter-panel__grid">
-      <div class="filter-row filter-row--search">
-        <div class="field field--full">
-          <label>Search Any Field</label>
-          <InputText
-            v-model="globalSearch"
-            placeholder="Search title, rule, CWE, file path, commit hash, repository, help text..."
-          />
+  <NCard>
+    <div class="filter-panel">
+      <div class="filter-panel__head">
+        <div>
+          <h2>Filters</h2>
+          <p>Refine alerts by severity, state, repository, tool, and query fields.</p>
         </div>
       </div>
 
-      <div class="filter-row filter-row--dropdowns">
+      <div class="filter-grid">
+        <div class="field field--full">
+          <label>Search Any Field</label>
+          <NInput
+            v-model:value="globalSearch"
+            placeholder="Search title, rule, CWE, file path, commit hash, repository, help text..."
+            clearable
+          />
+        </div>
+
         <div class="field">
           <label>Severity</label>
-          <MultiSelect
-            v-model="filters.severities"
-            :options="severityOptions"
+          <NSelect
+            v-model:value="filters.severities"
+            :options="toMultiOptions(severityOptions)"
+            multiple
+            clearable
             placeholder="All severities"
-            class="w-full"
           />
         </div>
 
         <div class="field">
           <label>State</label>
-          <MultiSelect v-model="filters.states" :options="stateOptions" placeholder="All states" class="w-full" />
+          <NSelect
+            v-model:value="filters.states"
+            :options="toMultiOptions(stateOptions)"
+            multiple
+            clearable
+            placeholder="All states"
+          />
         </div>
 
         <div class="field">
           <label>Repository</label>
-          <Select
-            v-model="filters.repositoryName"
-            :options="toSelectOptions(repositoryOptions)"
-            option-label="label"
-            option-value="value"
+          <NSelect
+            v-model:value="filters.repositoryName"
+            :options="toOptions(repositoryOptions)"
             placeholder="All"
           />
         </div>
 
         <div class="field">
           <label>Tool</label>
-          <Select
-            v-model="filters.toolName"
-            :options="toSelectOptions(toolOptions)"
-            option-label="label"
-            option-value="value"
+          <NSelect
+            v-model:value="filters.toolName"
+            :options="toOptions(toolOptions)"
             placeholder="All"
           />
         </div>
-      </div>
 
-      <div class="filter-row filter-row--text-inputs">
         <div class="field">
           <label>Alert ID</label>
-          <InputText v-model="filters.alertIdQuery" placeholder="contains id..." />
+          <NInput v-model:value="filters.alertIdQuery" placeholder="contains id..." clearable />
         </div>
 
         <div class="field">
           <label>Rule</label>
-          <InputText v-model="filters.ruleQuery" placeholder="rule id or name..." />
+          <NInput v-model:value="filters.ruleQuery" placeholder="rule id or name..." clearable />
         </div>
 
         <div class="field">
           <label>Path</label>
-          <InputText v-model="filters.pathQuery" placeholder="file path contains..." />
+          <NInput v-model:value="filters.pathQuery" placeholder="file path contains..." clearable />
         </div>
-      </div>
 
-      <div class="filter-row filter-row--checkboxes">
-        <div class="field field--checkbox">
-          <div class="check-row-inline">
-            <Checkbox v-model="filters.onlyAutofixable" binary input-id="onlyAuto" />
-            <label for="onlyAuto">Only auto-fixable</label>
-          </div>
+        <div class="field field--checkboxes">
+          <NCheckbox v-model:checked="filters.onlyAutofixable">Only auto-fixable</NCheckbox>
+          <NCheckbox v-model:checked="filters.hideDuplicateAlerts">Hide duplicate alerts</NCheckbox>
         </div>
-        <div class="field field--checkbox">
-          <div class="check-row-inline">
-            <Checkbox v-model="filters.hideDuplicateAlerts" binary input-id="hideDuplicateAlerts" />
-            <label for="hideDuplicateAlerts">Hide duplicate alerts</label>
-          </div>
-        </div>
-      </div>
 
-      <div class="filter-row filter-row--actions">
-        <Button label="Reset all filters" severity="secondary" outlined @click="store.resetFilters" />
+        <div class="field field--actions">
+          <NButton @click="store.resetFilters">Reset all filters</NButton>
+        </div>
       </div>
     </div>
-  </section>
+  </NCard>
 </template>
 
-<style>
+<style scoped>
 .filter-panel {
-  border: 1px solid var(--border);
-  border-radius: var(--radius-xl);
-  background: var(--surface-panel);
-  box-shadow: var(--shadow-sm), var(--shadow-rim);
-  padding: var(--space-md);
-}
-
-.filter-panel__head {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-sm);
-  margin-bottom: var(--space-sm);
+  flex-direction: column;
+  gap: var(--app-space-2);
 }
 
 .filter-panel__head h2 {
   margin: 0;
-  font-size: 0.95rem;
+  font-size: var(--app-font-md);
 }
 
 .filter-panel__head p {
   margin: 2px 0 0;
-  color: var(--text-soft);
-  font-size: 0.78rem;
+  opacity: 0.6;
+  font-size: var(--app-font-sm);
 }
 
-.filter-panel__grid {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-sm);
-}
-
-.filter-row {
+.filter-grid {
   display: grid;
-  gap: var(--space-sm);
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--app-space-2);
   align-items: end;
 }
 
-.filter-row--search {
-  grid-template-columns: 1fr;
+.field {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
 }
 
-.filter-row--dropdowns,
-.filter-row--text-inputs {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+.field--full {
+  grid-column: 1 / -1;
 }
 
-.filter-row--actions {
+.field--checkboxes {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  gap: var(--app-space-1);
   justify-content: flex-end;
 }
 
-.filter-row--checkboxes {
-  grid-template-columns: 1fr;
-}
-
-.check-row-inline {
+.field--actions {
   display: flex;
-  gap: var(--space-xs);
-  align-items: center;
-  min-height: 1.8rem;
+  justify-content: flex-end;
+  grid-column: 1 / -1;
 }
 
-.check-row-inline label {
-  white-space: nowrap;
+.field :deep(.n-select),
+.field :deep(.n-input) {
+  max-width: 100%;
+  overflow: hidden;
 }
 
-@media (max-width: 1120px) {
-  .filter-row--dropdowns,
-  .filter-row--text-inputs {
+.field :deep(.n-select .n-base-selection) {
+  min-width: 0;
+}
+
+.field :deep(.n-base-selection-tags) {
+  flex-wrap: wrap;
+}
+
+.field > label {
+  font-size: var(--app-font-xs);
+  opacity: 0.6;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+@media (max-width: 900px) {
+  .filter-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-@media (max-width: 740px) {
-  .filter-row--dropdowns,
-  .filter-row--text-inputs {
+@media (max-width: 620px) {
+  .filter-grid {
     grid-template-columns: 1fr;
   }
 
-  .filter-panel__head,
-  .filter-row--actions {
+  .field--actions :deep(.n-button) {
     width: 100%;
-    justify-content: flex-start;
   }
 }
 </style>
