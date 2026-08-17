@@ -4,7 +4,6 @@ import { storeToRefs } from 'pinia'
 import {
   NAlert,
   NButton,
-  NCard,
   NForm,
   NFormItem,
   NInput,
@@ -208,8 +207,7 @@ const closeProgressModal = (): void => {
 </script>
 
 <template>
-  <NCard size="small" embedded>
-    <h3 class="action-card__name">Connect Azure DevOps</h3>
+  <div>
     <p class="action-card__desc">Connect once, then choose project, repositories, and a branch/ref for each repository.</p>
     <p class="action-card__note">Your token is kept in memory only and cleared on refresh.</p>
 
@@ -324,7 +322,7 @@ const closeProgressModal = (): void => {
         </div>
       </div>
     </NForm>
-  </NCard>
+  </div>
 
   <NModal
     v-model:show="progressModalVisible"
@@ -390,6 +388,10 @@ const closeProgressModal = (): void => {
 </template>
 
 <style scoped>
+.action-card__desc {
+  margin-top: 10px;
+}
+
 .azure-inline-form {
   margin-top: var(--app-space-2);
   display: grid;

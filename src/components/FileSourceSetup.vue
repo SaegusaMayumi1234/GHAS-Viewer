@@ -52,8 +52,7 @@ const importPercent = computed(() => calcPercent(importProgress.value, importTot
     @change="onImportFile"
   />
 
-  <NCard size="small" embedded>
-    <h3 class="action-card__name">Import from File</h3>
+  <div>
     <p class="action-card__desc">Import GHAS JSON. Link a project folder to enable source preview.</p>
 
     <div class="action-card__content">
@@ -82,7 +81,7 @@ const importPercent = computed(() => calcPercent(importProgress.value, importTot
 
     <p v-if="folderFileCount > 0" class="action-card__note action-card__note--ok">{{ folderFileCount }} files indexed</p>
     <p v-else class="action-card__note">Linking a folder enables source preview beside each alert.</p>
-  </NCard>
+  </div>
 
   <NAlert v-if="errorMessage" type="error" :title="errorMessage" />
   <NAlert
@@ -99,6 +98,10 @@ const importPercent = computed(() => calcPercent(importProgress.value, importTot
 </template>
 
 <style scoped>
+.action-card__desc {
+  margin-top: 10px;
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;
