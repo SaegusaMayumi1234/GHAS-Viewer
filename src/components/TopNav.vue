@@ -71,7 +71,7 @@ const repositoryUrl = computed((): string => {
   align-items: center;
   gap: var(--app-space-2);
   width: 100%;
-  padding: var(--app-space-1) var(--app-space-3);
+  padding: 8px var(--app-space-3);
   border-bottom: 1px solid v-bind(borderColor);
   background: v-bind(cardColor);
 }
@@ -86,8 +86,8 @@ const repositoryUrl = computed((): string => {
 .top-nav__glyph {
   display: grid;
   place-items: center;
-  width: 2.2rem;
-  height: 2.2rem;
+  width: 2.5rem;
+  height: 2.5rem;
   border-radius: 8px;
   border: 1px solid var(--app-color-azure-hover);
   background: var(--app-color-azure-soft);
@@ -96,7 +96,7 @@ const repositoryUrl = computed((): string => {
 
 .top-nav__title-wrap {
   display: grid;
-  gap: 1px;
+  gap: 0px;
   min-width: 0;
 }
 
