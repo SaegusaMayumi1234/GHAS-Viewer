@@ -18,7 +18,7 @@ import { useGhasStore } from '../stores/ghasStore'
 import type { DataSourceMode } from '../types/ghas'
 
 const store = useGhasStore()
-const { stats } = storeToRefs(store)
+const { stats, folderFileCount } = storeToRefs(store)
 
 const sourceSelectionVisible = ref(false)
 const sourceChoice = ref<DataSourceMode | null>(null)
@@ -26,6 +26,17 @@ const selectedSourceMode = ref<DataSourceMode | null>(null)
 
 const hasSelectedSource = computed(() => selectedSourceMode.value != null)
 const hasImportedAlerts = computed(() => stats.value.totalImported > 0)
+
+const loadAlertsPanelTitle = computed(() => {
+  let title = 'Load Alerts'
+  if (hasImportedAlerts.value) {
+    title = `${stats.value.totalImported} Alerts Loaded`
+    if (selectedSourceMode.value === 'file' && folderFileCount.value > 0) {
+      title += ` and ${folderFileCount.value} Files Indexed`
+    }
+  }
+  return title;
+});
 
 const openSourceSelector = (): void => {
   sourceChoice.value = selectedSourceMode.value
@@ -58,11 +69,11 @@ const selectedSourceTitle = computed(() => {
 
 <template>
   <NCard>
-    <NCollapse :default-expanded-names="['load-alerts']" arrow-placement="right">
+    <NCollapse arrow-placement="right">
       <NCollapseItem name="load-alerts">
         <template #header>
           <h3 class='load-panel__title'>
-            {{ hasImportedAlerts ? `${stats.totalImported} Alerts Loaded` : 'Load Alerts'}}
+            {{ loadAlertsPanelTitle }}
           </h3>
         </template>
         <div class="load-panel__head">
@@ -78,8 +89,8 @@ const selectedSourceTitle = computed(() => {
             <FileSourceSetup v-else-if="selectedSourceMode === 'file'" />
           </div>
 
-          <NCard v-if="hasImportedAlerts" size="small" embedded>
-            <NIcon size="24" color="var(--app-color-danger)" style="margin-bottom: 8px"><Trash /></NIcon>
+          <NCard v-if="hasImportedAlerts" size="small" class="reset-alerts" embedded>
+            <NIcon size="24" color="var(--app-color-danger)" style="margin-top: 2px"><Trash /></NIcon>
             <h3 class="action-card__name">Reset Imported Alerts</h3>
             <p class="action-card__desc">Remove all {{ stats.totalImported }} imported alerts and reset filters.</p>
             <NButton type="error" block style="margin-top: 12px" @click="store.clearAlerts()">Reset Alerts</NButton>
@@ -150,14 +161,13 @@ const selectedSourceTitle = computed(() => {
   font-size: var(--app-font-sm);
 }
 
-.load-panel__body {
+.source-flow {
   display: grid;
   gap: var(--app-space-2);
 }
 
-.source-flow {
-  display: grid;
-  gap: var(--app-space-2);
+.reset-alerts {
+  margin-top: var(--app-space-2);
 }
 
 .source-choice-grid {

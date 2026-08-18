@@ -57,6 +57,7 @@ export const useGhasStore = defineStore('ghas', () => {
   const azureOrg = ref('')
   const azurePat = ref('')
   const azureRef = ref('')
+  const azureCurrentStep = ref(1)
   const azureRepoRefs = ref<Record<string, string>>({})
   const azureProjects = ref<AzureProject[]>([])
   const azureRepos = ref<AzureRepository[]>([])
@@ -686,6 +687,7 @@ export const useGhasStore = defineStore('ghas', () => {
     azureOrg,
     azurePat,
     azureRef,
+    azureCurrentStep,
     azureRepoRefs,
     azureProjects,
     azureRepos,

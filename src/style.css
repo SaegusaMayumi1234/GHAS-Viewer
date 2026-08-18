@@ -65,7 +65,7 @@ body {
   -webkit-text-size-adjust: 100%;
 }
 
-/* ── Shared action-card / guided-step / dialog-actions ── */
+/* ── Shared action-card / dialog-actions ── */
 .action-card__name {
   margin: 0 0 6px;
   font-size: var(--app-font-md);
@@ -84,25 +84,6 @@ body {
   font-size: var(--app-font-xs);
   opacity: 0.55;
   font-style: italic;
-}
-
-.guided-step {
-  border: 1px solid var(--app-border);
-  border-radius: 10px;
-  padding: var(--app-space-2);
-}
-
-.guided-step__head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: var(--app-space-1);
-  margin-bottom: var(--app-space-1);
-}
-
-.guided-step__head h4 {
-  margin: 0;
-  font-size: var(--app-font-sm);
 }
 
 .dialog-actions {

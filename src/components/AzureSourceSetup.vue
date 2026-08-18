@@ -31,6 +31,7 @@ const {
   stats,
   azureOrg,
   azurePat,
+  azureCurrentStep: currentStep,
   azureRepoRefs,
   azureProjects,
   azureRepos,
@@ -47,7 +48,6 @@ const azureOrgInput = ref('')
 const azurePatInput = ref('')
 const lastLoadedCredentialKey = ref('')
 const progressModalVisible = ref(false)
-const currentStep = ref(1)
 const isMobile = useMediaQuery('(max-width: 740px)')
 const rememberAzureCredentials = ref(false)
 const azureCredentialsStorageKey = 'ghas-viewer.azure-credentials'
@@ -477,7 +477,6 @@ const closeProgressModal = (): void => {
   margin-bottom: 10px;
 }
 
-
 .azure-inline-form {
   margin-top: var(--app-space-2);
   display: grid;
@@ -535,13 +534,6 @@ const closeProgressModal = (): void => {
 }
 
 @media (max-width: 740px) {
-  .guided-step__head {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-
-
   .azure-inline-grid {
     grid-template-columns: 1fr;
   }
