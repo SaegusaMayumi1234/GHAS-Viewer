@@ -203,8 +203,7 @@ const azureHasSuccess = computed(() =>
   dataSourceMode.value === 'azure' &&
   !isImporting.value &&
   !azureConnectionError.value &&
-  !errorMessage.value &&
-  stats.value.totalImported > 0,
+  !errorMessage.value,
 )
 
 const loadAzureProjects = async (): Promise<void> => {
@@ -275,7 +274,7 @@ const closeProgressModal = (): void => {
       <NSteps :current="currentStep" :vertical="isMobile" size="small" class="azure-steps">
         <NStep title="Connect Organization" :description="azureProjectsStatus" />
         <NStep title="Choose Project" :description="azureReposStatus" />
-        <NStep title="Choose Repositories and Set Branch/Ref" :description="hasValidAzureRepoRefs ? 'Ready' : 'Required'" />
+        <NStep title="Choose Repositories and Set Branch/Ref" :description="hasValidAzureRepoRefs ? 'Ready' : 'Not loaded'" />
       </NSteps>
 
       <NForm label-placement="top" class="azure-inline-form">
