@@ -1,16 +1,21 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
+import { useMediaQuery } from '@vueuse/core'
 import {
   NAlert,
   NButton,
   NCard,
+  NCheckbox,
+  NDivider,
   NForm,
   NFormItem,
   NInput,
   NModal,
   NProgress,
   NSelect,
+  NStep,
+  NSteps,
 } from 'naive-ui'
 import { useGhasStore } from '../stores/ghasStore'
 import { calcPercent } from '../utils/snippetUtils'
@@ -26,6 +31,7 @@ const {
   stats,
   azureOrg,
   azurePat,
+  azureCurrentStep: currentStep,
   azureRepoRefs,
   azureProjects,
   azureRepos,
@@ -42,15 +48,31 @@ const azureOrgInput = ref('')
 const azurePatInput = ref('')
 const lastLoadedCredentialKey = ref('')
 const progressModalVisible = ref(false)
+const isMobile = useMediaQuery('(max-width: 740px)')
+const rememberAzureCredentials = ref(false)
+const azureCredentialsStorageKey = 'ghas-viewer.azure-credentials'
+
+onMounted(() => {
+  syncAzureInputsFromStore()
+
+  const savedCredentials = localStorage.getItem(azureCredentialsStorageKey)
+  if (!savedCredentials) return
+
+  try {
+    const credentials = JSON.parse(savedCredentials) as { organization?: unknown; pat?: unknown }
+    if (typeof credentials.organization !== 'string' || typeof credentials.pat !== 'string') return
+    azureOrgInput.value = credentials.organization
+    azurePatInput.value = credentials.pat
+    rememberAzureCredentials.value = true
+  } catch {
+    localStorage.removeItem(azureCredentialsStorageKey)
+  }
+})
 
 const syncAzureInputsFromStore = (): void => {
   azureOrgInput.value = azureOrg.value
   azurePatInput.value = azurePat.value
 }
-
-onMounted(() => {
-  syncAzureInputsFromStore()
-})
 
 watch([azureOrg, azurePat], () => {
   syncAzureInputsFromStore()
@@ -73,6 +95,29 @@ const repoOptions = computed(() =>
 const hasAzureCredentials = computed(() =>
   Boolean(azureOrgInput.value.trim() && azurePatInput.value.trim()),
 )
+
+const persistAzureCredentials = (): void => {
+  if (!rememberAzureCredentials.value) {
+    localStorage.removeItem(azureCredentialsStorageKey)
+    return
+  }
+
+  if (!hasAzureCredentials.value) return
+
+  localStorage.setItem(azureCredentialsStorageKey, JSON.stringify({
+    organization: azureOrgInput.value.trim(),
+    pat: azurePatInput.value.trim(),
+  }))
+}
+
+const onRememberAzureCredentialsChange = (value: boolean): void => {
+  rememberAzureCredentials.value = value
+  persistAzureCredentials()
+}
+
+watch([azureOrgInput, azurePatInput, rememberAzureCredentials], () => {
+  persistAzureCredentials()
+})
 
 const azureCredentialKey = computed(() =>
   `${azureOrgInput.value.trim()}::${azurePatInput.value.trim()}`,
@@ -123,6 +168,21 @@ const hasValidAzureRepoRefs = computed(() => {
 
 const canImportFromAzure = computed(() => hasSelectedRepo.value && hasValidAzureRepoRefs.value)
 
+const maxAvailableStep = computed(() => {
+  if (!hasAzureCredentials.value || projectOptions.value.length === 0) return 1
+  if (!hasSelectedProject.value || repoOptions.value.length === 0) return 2
+  return 3
+})
+
+const goToStep = (step: number): void => {
+  if (step <= maxAvailableStep.value) currentStep.value = step
+}
+
+const goToRepositoryStep = async (): Promise<void> => {
+  await loadAzureRepos()
+  if (repoOptions.value.length > 0) goToStep(3)
+}
+
 const azureProjectsStatus = computed(() => {
   if (azureLoadingProjects.value) return 'Loading'
   if (projectOptions.value.length > 0) return `Found ${projectOptions.value.length} projects`
@@ -143,12 +203,12 @@ const azureHasSuccess = computed(() =>
   dataSourceMode.value === 'azure' &&
   !isImporting.value &&
   !azureConnectionError.value &&
-  !errorMessage.value &&
-  stats.value.totalImported > 0,
+  !errorMessage.value,
 )
 
 const loadAzureProjects = async (): Promise<void> => {
   store.clearAzureFeedback()
+  persistAzureCredentials()
   store.setAzureCredentials(azureOrgInput.value, azurePatInput.value)
   store.setDataSourceMode('azure')
   await store.loadAzureProjects()
@@ -162,10 +222,8 @@ const loadAzureRepos = async (): Promise<void> => {
   await store.loadAzureRepos()
 }
 
-const onProjectChange = async (projectId: string): Promise<void> => {
+const onProjectChange = (projectId: string): void => {
   store.selectAzureProject(projectId)
-  if (!hasAzureCredentials.value) return
-  await loadAzureRepos()
 }
 
 const onRepoChange = (repoIds: string[]): void => {
@@ -195,6 +253,7 @@ const loadAzureAlerts = async (): Promise<void> => {
   }
 
   store.clearAzureFeedback()
+  persistAzureCredentials()
   store.setAzureCredentials(azureOrgInput.value, azurePatInput.value)
   store.setDataSourceMode('azure')
   progressModalVisible.value = true
@@ -208,123 +267,128 @@ const closeProgressModal = (): void => {
 </script>
 
 <template>
-  <NCard size="small" embedded>
-    <h3 class="action-card__name">Connect Azure DevOps</h3>
+  <div>
     <p class="action-card__desc">Connect once, then choose project, repositories, and a branch/ref for each repository.</p>
-    <p class="action-card__note">Your token is kept in memory only and cleared on refresh.</p>
 
-    <NForm label-placement="top" class="azure-inline-form">
-      <div class="guided-step">
-        <div class="guided-step__head">
-          <h4>Connect Organization</h4>
-          <span class="step-state">{{ azureProjectsStatus }}</span>
-        </div>
+    <NCard>
+      <NSteps :current="currentStep" :vertical="isMobile" size="small" class="azure-steps">
+        <NStep title="Connect Organization" :description="azureProjectsStatus" />
+        <NStep title="Choose Project" :description="azureReposStatus" />
+        <NStep title="Choose Repositories and Set Branch/Ref" :description="hasValidAzureRepoRefs ? 'Ready' : 'Not loaded'" />
+      </NSteps>
 
-        <div class="azure-inline-grid">
-          <NFormItem label="Organization">
-            <NInput
-              :value="azureOrgInput"
-              placeholder="your-org"
-              @update:value="(value) => (azureOrgInput = value)"
-            />
-          </NFormItem>
-          <NFormItem label="Personal Access Token">
-            <NInput
-              :value="azurePatInput"
-              type="password"
-              show-password-on="click"
-              placeholder="Azure DevOps PAT"
-              @update:value="(value) => (azurePatInput = value)"
-            />
-          </NFormItem>
-        </div>
-        <div class="azure-inline-actions">
-          <NButton
-            type="primary"
-            :loading="azureLoadingProjects"
-            :disabled="!hasAzureCredentials"
-            @click="loadAzureProjects"
-          >Get Projects</NButton>
-        </div>
-        <p v-if="showCredentialRefreshHint" class="action-card__note">Credentials changed. Refresh projects before choosing one.</p>
-      </div>
+      <NForm label-placement="top" class="azure-inline-form">
+        <div class="azure-step-card">
+          <div v-if="currentStep === 1" class="azure-step-panel">
+            <NAlert v-if="azureConnectionError" type="error" :title="azureConnectionError" :bordered="false" class="azure-action-alert" />
+            <div class="azure-inline-grid">
+              <NFormItem label="Organization">
+                <NInput
+                  :value="azureOrgInput"
+                  placeholder="your-org"
+                  @update:value="(value) => (azureOrgInput = value)"
+                />
+              </NFormItem>
+              <NFormItem label="Personal Access Token">
+                <NInput
+                  :value="azurePatInput"
+                  type="password"
+                  show-password-on="click"
+                  placeholder="Azure DevOps PAT"
+                  @update:value="(value) => (azurePatInput = value)"
+                />
+              </NFormItem>
+            </div>
+            <NCheckbox
+              :checked="rememberAzureCredentials"
+              class="remember-credentials-checkbox"
+              @update:checked="onRememberAzureCredentialsChange"
+            >Remember organization and PAT on this device</NCheckbox>
+            <div class="azure-inline-actions">
+              <NButton
+                type="primary"
+                :loading="azureLoadingProjects"
+                :disabled="!hasAzureCredentials"
+                @click="async () => { await loadAzureProjects(); if (projectOptions.length > 0) goToStep(2) }"
+              >Next</NButton>
+            </div>
+            <p v-if="showCredentialRefreshHint" class="action-card__note">Credentials changed. Refresh projects before choosing one.</p>
+          </div>
 
-      <div class="guided-step">
-        <div class="guided-step__head">
-          <h4>Choose Project and Repository</h4>
-          <span class="step-state">{{ azureReposStatus }}</span>
-        </div>
+          <div v-else-if="currentStep === 2" class="azure-step-panel">
+            <NAlert v-if="azureConnectionError" type="error" :title="azureConnectionError" :bordered="false" class="azure-action-alert" />
+            <NFormItem label="Project">
+              <NSelect
+                :value="selectedAzureProjectId"
+                :options="projectOptions"
+                :disabled="!hasAzureCredentials || azureLoadingProjects || projectOptions.length === 0"
+                filterable
+                filter-placeholder="Search project..."
+                placeholder="Select project"
+                @update:value="(value) => onProjectChange(value)"
+              />
+            </NFormItem>
 
-        <div class="azure-inline-grid">
-          <NFormItem label="Project">
-            <NSelect
-              :value="selectedAzureProjectId"
-              :options="projectOptions"
-              :disabled="!hasAzureCredentials || azureLoadingProjects || projectOptions.length === 0"
-              filterable
-              filter-placeholder="Search project..."
-              placeholder="Select project"
-              @update:value="(value) => onProjectChange(value)"
-            />
-          </NFormItem>
-          <NFormItem label="Repository">
-            <NSelect
-              :value="selectedAzureRepoIds"
-              :options="repoOptions"
-              :disabled="!selectedAzureProjectId || azureLoadingRepos || repoOptions.length === 0"
-              multiple
-              clearable
-              max-tag-count="responsive"
-              filterable
-              filter-placeholder="Search repository..."
-              placeholder="Select one or more repositories"
-              @update:value="(value) => onRepoChange(value)"
-            />
-          </NFormItem>
-        </div>
+            <div class="azure-inline-actions">
+              <NButton @click="goToStep(1)">Back</NButton>
+              <NButton
+                type="primary"
+                :disabled="!selectedAzureProjectId"
+                :loading="azureLoadingRepos"
+                @click="goToRepositoryStep"
+              >Next</NButton>
+            </div>
+          </div>
 
-        <div class="azure-inline-actions">
-          <NButton
-            :loading="azureLoadingRepos"
-            :disabled="!selectedAzureProjectId"
-            @click="loadAzureRepos"
-          >Get Repositories</NButton>
-        </div>
-      </div>
+          <div v-else class="azure-step-panel">
+            <NAlert v-if="azureConnectionError" type="error" :title="azureConnectionError" :bordered="false" class="azure-action-alert" />
+            <NFormItem label="Repository">
+              <NSelect
+                :value="selectedAzureRepoIds"
+                :options="repoOptions"
+                :disabled="!selectedAzureProjectId || azureLoadingRepos || repoOptions.length === 0"
+                multiple
+                clearable
+                max-tag-count="responsive"
+                filterable
+                filter-placeholder="Search repository..."
+                placeholder="Select one or more repositories"
+                @update:value="(value) => onRepoChange(value)"
+              />
+            </NFormItem>
 
-      <div class="guided-step">
-        <div class="guided-step__head">
-          <h4>Set Branch/Ref Per Repository</h4>
-          <span class="step-state">{{ hasValidAzureRepoRefs ? 'Ready' : 'Required' }}</span>
-        </div>
+            <NDivider />
 
-        <div v-if="selectedAzureRepoRows.length > 0" class="repo-ref-grid">
-          <NFormItem
-            v-for="repo in selectedAzureRepoRows"
-            :key="repo.id"
-            :label="`Branch/Ref · ${repo.name}`"
-          >
-            <NInput
-              :value="repo.configuredRef || repo.resolvedRef"
-              placeholder="main or refs/heads/main"
-              @update:value="(value) => onRepoRefChange(repo.id, value)"
-            />
-          </NFormItem>
-        </div>
-        <p v-else class="action-card__note">Select repositories first to configure branch/ref values.</p>
+            <div v-if="selectedAzureRepoRows.length > 0" class="repo-ref-grid">
+              <NFormItem
+                v-for="repo in selectedAzureRepoRows"
+                :key="repo.id"
+                :label="`Branch/Ref · ${repo.name}`"
+              >
+                <NInput
+                  :value="repo.configuredRef || repo.resolvedRef"
+                  placeholder="main or refs/heads/main"
+                  @update:value="(value) => onRepoRefChange(repo.id, value)"
+                />
+              </NFormItem>
+            </div>
+            <p v-else class="action-card__note">Select repositories first to configure branch/ref values.</p>
 
-        <p class="action-card__note">Use branch name like main or full ref like refs/heads/main.</p>
-        <div class="azure-inline-actions">
-          <NButton
-            type="primary"
-            :loading="azureLoadingAlerts"
-            :disabled="!canImportFromAzure"
-            @click="loadAzureAlerts"
-          >Import Alerts</NButton>
+            <p class="action-card__note">Use branch name like main or full ref like refs/heads/main.</p>
+            <div class="azure-inline-actions">
+              <NButton @click="goToStep(2)">Back</NButton>
+              <NButton
+                type="primary"
+                :loading="azureLoadingAlerts"
+                :disabled="!canImportFromAzure"
+                @click="loadAzureAlerts"
+              >Import Alerts</NButton>
+            </div>
+          </div>
         </div>
-      </div>
-    </NForm>
-  </NCard>
+      </NForm>
+    </NCard>
+  </div>
 
   <NModal
     v-model:show="progressModalVisible"
@@ -390,6 +454,28 @@ const closeProgressModal = (): void => {
 </template>
 
 <style scoped>
+.action-card__desc {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.azure-step-panel {
+  margin-top: 0;
+}
+
+.azure-action-alert {
+  margin-bottom: var(--app-space-2);
+}
+
+.remember-credentials-checkbox {
+  margin-bottom: 5px;
+}
+
+.azure-step-card :deep(.n-divider:not(.n-divider--vertical)) {
+  margin-top: 5px;
+  margin-bottom: 10px;
+}
+
 .azure-inline-form {
   margin-top: var(--app-space-2);
   display: grid;
@@ -411,6 +497,13 @@ const closeProgressModal = (): void => {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--app-space-2);
+}
+
+.azure-step-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--app-space-1);
+  margin-top: var(--app-space-2);
 }
 
 .azure-inline-actions {
@@ -440,11 +533,6 @@ const closeProgressModal = (): void => {
 }
 
 @media (max-width: 740px) {
-  .guided-step__head {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
   .azure-inline-grid {
     grid-template-columns: 1fr;
   }

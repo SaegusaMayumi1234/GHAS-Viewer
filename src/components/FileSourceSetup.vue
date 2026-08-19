@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { storeToRefs } from 'pinia'
-import { NAlert, NButton, NCard, NProgress, useMessage } from 'naive-ui'
+import { NAlert, NButton, NCard, NIcon, NProgress, useMessage } from 'naive-ui'
+import { FileCode, Folder } from '@vicons/tabler'
 import { useGhasStore } from '../stores/ghasStore'
 import { calcPercent } from '../utils/snippetUtils'
 
@@ -52,37 +53,42 @@ const importPercent = computed(() => calcPercent(importProgress.value, importTot
     @change="onImportFile"
   />
 
-  <NCard size="small" embedded>
-    <h3 class="action-card__name">Import from File</h3>
-    <p class="action-card__desc">Import GHAS JSON. Link a project folder to enable source preview.</p>
+  <div>
+    <p class="action-card__desc">Import alerts JSON file and link your project folder to preview source code.</p>
 
     <div class="action-card__content">
-      <div class="guided-step">
+      <NCard class="guided-step" size="small">
+        <NIcon class="guided-step__icon" size="28" color="var(--app-color-azure)"><FileCode /></NIcon>
         <div class="guided-step__head">
-          <h4>Select GHAS JSON</h4>
-          <span class="step-state">Required</span>
+
+          <div>
+            <h4>Select JSON File</h4>
+            <p>Load your GitHub Advanced Security alerts export to start exploring findings.</p>
+          </div>
         </div>
         <div class="file-actions">
           <NButton type="primary" block @click="openImportPicker">Import Alerts JSON</NButton>
         </div>
-      </div>
+      </NCard>
 
-      <div class="guided-step">
+      <NCard class="guided-step" size="small">
+        <NIcon class="guided-step__icon" size="28" color="var(--app-color-azure)"><Folder /></NIcon>
         <div class="guided-step__head">
-          <h4>Link Project Folder</h4>
-          <span class="step-state" :class="{ 'step-state--ok': folderFileCount > 0 }">{{ folderFileCount > 0 ? 'Connected' : 'Optional' }}</span>
+
+          <div>
+            <h4>Link Project Folder</h4>
+            <p>Connect your local project folder to preview matching source files beside alert.</p>
+          </div>
         </div>
         <div class="file-actions">
           <NButton block :loading="indexingFolder" @click="connectFolder">
             {{ folderFileCount > 0 ? 'Change Linked Folder' : 'Link Project Folder' }}
           </NButton>
         </div>
-      </div>
+        <p v-if="folderFileCount > 0" class="action-card__note action-card__note--ok">{{ folderFileCount }} files indexed</p>
+      </NCard>
     </div>
-
-    <p v-if="folderFileCount > 0" class="action-card__note action-card__note--ok">{{ folderFileCount }} files indexed</p>
-    <p v-else class="action-card__note">Linking a folder enables source preview beside each alert.</p>
-  </NCard>
+  </div>
 
   <NAlert v-if="errorMessage" type="error" :title="errorMessage" />
   <NAlert
@@ -99,6 +105,11 @@ const importPercent = computed(() => calcPercent(importProgress.value, importTot
 </template>
 
 <style scoped>
+.action-card__desc {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;
@@ -111,43 +122,39 @@ const importPercent = computed(() => calcPercent(importProgress.value, importTot
 .action-card__content {
   display: grid;
   gap: var(--app-space-2);
-  margin-top: var(--app-space-2);
   grid-template-columns: repeat(2, 1fr);
 }
 
 .action-card__note--ok {
-  color: var(--app-color-success);
+  color: var(--app-color-azure);
   opacity: 1;
   font-style: normal;
   font-weight: 600;
 }
 
-.guided-step {
-  border: 1px solid var(--app-border);
-  border-radius: 10px;
-  padding: var(--app-space-2);
-  margin-top: var(--app-space-2);
+.guided-step__head {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--app-space-2);
 }
 
-.step-state {
-  display: inline-flex;
-  align-items: center;
-  border: 1px solid var(--app-border);
-  border-radius: 999px;
-  padding: 2px 8px;
-  font-size: var(--app-font-xs);
-  font-weight: 600;
-  opacity: 0.8;
+.guided-step__icon {
+  flex: 0 0 auto;
+  margin-top: 2px;
 }
 
-.step-state--ok {
-  color: var(--app-color-success);
-  border-color: var(--app-color-success);
+.guided-step h4 {
+  margin: 0;
+}
+
+.guided-step p {
+  margin: 6px 0 0;
+  font-size: var(--app-font-sm);
+  line-height: 1.5;  display: grid;
+  opacity: 0.7;
 }
 
 .file-actions {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--app-space-1);
   margin-top: var(--app-space-2);
 }
@@ -159,11 +166,6 @@ const importPercent = computed(() => calcPercent(importProgress.value, importTot
 }
 
 @media (max-width: 740px) {
-  .guided-step__head {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
   .action-card__content {
     display: grid;
     gap: var(--app-space-2);

@@ -4,6 +4,8 @@ import { storeToRefs } from 'pinia'
 import {
   NButton,
   NCard,
+  NCollapse,
+  NCollapseItem,
   NIcon,
   NModal,
   NRadio,
@@ -16,13 +18,25 @@ import { useGhasStore } from '../stores/ghasStore'
 import type { DataSourceMode } from '../types/ghas'
 
 const store = useGhasStore()
-const { stats } = storeToRefs(store)
+const { stats, folderFileCount } = storeToRefs(store)
 
 const sourceSelectionVisible = ref(false)
 const sourceChoice = ref<DataSourceMode | null>(null)
 const selectedSourceMode = ref<DataSourceMode | null>(null)
 
 const hasSelectedSource = computed(() => selectedSourceMode.value != null)
+const hasImportedAlerts = computed(() => stats.value.totalImported > 0)
+
+const loadAlertsPanelTitle = computed(() => {
+  let title = 'Load Alerts'
+  if (hasImportedAlerts.value) {
+    title = `${stats.value.totalImported} Alerts Loaded`
+    if (selectedSourceMode.value === 'file' && folderFileCount.value > 0) {
+      title += ` and ${folderFileCount.value} Files Indexed`
+    }
+  }
+  return title;
+});
 
 const openSourceSelector = (): void => {
   sourceChoice.value = selectedSourceMode.value
@@ -40,31 +54,50 @@ const applySourceSelection = (): void => {
 const cancelSourceSelection = (): void => {
   sourceSelectionVisible.value = false
 }
+
+const selectedSourceTitle = computed(() => {
+  switch (selectedSourceMode.value) {
+    case 'azure':
+      return 'Azure DevOps';
+    case 'file':
+      return 'Import from File';
+    default:
+      return '';
+  }
+})
 </script>
 
 <template>
   <NCard>
-    <div class="load-panel__content">
-      <div class="load-panel__head">
-        <div>
-          <h2>Load Alerts</h2>
-          <p>Choose a source, complete setup, then import alerts from one guided flow.</p>
+    <NCollapse arrow-placement="right">
+      <NCollapseItem name="load-alerts">
+        <template #header>
+          <h3 class='load-panel__title'>
+            {{ loadAlertsPanelTitle }}
+          </h3>
+        </template>
+        <div class="load-panel__head">
+          <div>
+            <p>{{ hasSelectedSource ? 'Current Source:' : 'Choose a source, complete setup, then import alerts from one guided flow.' }}</p>
+            <h3 v-if="hasSelectedSource">{{ selectedSourceTitle }}</h3>
+          </div>
+          <NButton type="primary" @click="openSourceSelector">{{ hasSelectedSource ? 'Switch Source' : 'Choose Source' }}</NButton>
         </div>
-        <NButton type="primary" @click="openSourceSelector">{{ hasSelectedSource ? 'Switch Source' : 'Choose Source' }}</NButton>
-      </div>
+        <div class="load-panel__body">
+          <div v-if="hasSelectedSource" class="source-flow">
+            <AzureSourceSetup v-if="selectedSourceMode === 'azure'" />
+            <FileSourceSetup v-else-if="selectedSourceMode === 'file'" />
+          </div>
 
-      <div v-if="hasSelectedSource" class="source-flow">
-        <AzureSourceSetup v-if="selectedSourceMode === 'azure'" />
-        <FileSourceSetup v-else-if="selectedSourceMode === 'file'" />
-      </div>
-
-      <NCard v-if="stats.totalImported > 0" size="small" embedded>
-        <NIcon size="24" color="var(--app-color-danger)" style="margin-bottom: 8px"><Trash /></NIcon>
-        <h3 class="action-card__name">Reset Imported Alerts</h3>
-        <p class="action-card__desc">Remove all {{ stats.totalImported }} imported alerts and reset filters.</p>
-        <NButton type="error" block style="margin-top: 12px" @click="store.clearAlerts()">Reset Alerts</NButton>
-      </NCard>
-    </div>
+          <NCard v-if="hasImportedAlerts" size="small" class="reset-alerts" embedded>
+            <NIcon size="24" color="var(--app-color-danger)" style="margin-top: 2px"><Trash /></NIcon>
+            <h3 class="action-card__name">Reset Imported Alerts</h3>
+            <p class="action-card__desc">Remove all {{ stats.totalImported }} imported alerts and reset filters.</p>
+            <NButton type="error" block style="margin-top: 12px" @click="store.clearAlerts()">Reset Alerts</NButton>
+          </NCard>
+        </div>
+      </NCollapseItem>
+    </NCollapse>
   </NCard>
 
   <NModal
@@ -81,7 +114,7 @@ const cancelSourceSelection = (): void => {
             <NRadio value="azure" />
             <NIcon size="24" color="var(--app-color-azure)"><Cloud /></NIcon>
           </div>
-          <h3 class="action-card__name">Connect Azure DevOps</h3>
+          <h3 class="action-card__name">Azure DevOps</h3>
           <p class="action-card__desc">Import alerts from Azure DevOps using organization, project, repositories, and branch/ref settings.</p>
         </label>
 
@@ -90,7 +123,7 @@ const cancelSourceSelection = (): void => {
             <NRadio value="file" />
             <NIcon size="24" color="var(--app-color-azure)"><FileCode /></NIcon>
           </div>
-          <h3 class="action-card__name">Import from JSON File</h3>
+          <h3 class="action-card__name">Import from File</h3>
           <p class="action-card__desc">Import local GHAS JSON and optionally link your project folder for source preview.</p>
         </label>
       </div>
@@ -106,9 +139,8 @@ const cancelSourceSelection = (): void => {
 </template>
 
 <style scoped>
-.load-panel__content {
-  display: grid;
-  gap: var(--app-space-2);
+.load-panel__title {
+  margin: 0
 }
 
 .load-panel__head {
@@ -118,7 +150,7 @@ const cancelSourceSelection = (): void => {
   gap: var(--app-space-2);
 }
 
-.load-panel__head h2 {
+.load-panel__head h3 {
   margin: 0;
   font-size: var(--app-font-md);
 }
@@ -132,6 +164,10 @@ const cancelSourceSelection = (): void => {
 .source-flow {
   display: grid;
   gap: var(--app-space-2);
+}
+
+.reset-alerts {
+  margin-top: var(--app-space-2);
 }
 
 .source-choice-grid {
