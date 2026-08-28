@@ -16,7 +16,7 @@ Many companies provide GitHub Advanced Security alert data only as JSON exports,
 - **📁 Local File Processing** - All data stays on your local machine. No uploads, no servers.
 - **🔍 Smart Search & Filter** - Quickly find alerts by type, severity, path, and more
 - **📋 Alert Management** - View detailed alert information with syntax-highlighted code previews
-- **🎨 Clean UI** - Modern interface built with PrimeVue for seamless navigation
+- **🎨 Clean UI** - Modern interface built with Naive UI for seamless navigation
 - **📊 Alert Statistics** - Dashboard overview of vulnerability types and severity levels
 - **🔗 Markdown Support** - Render markdown in alert details for better readability
 - **⚡ Type-Safe** - Built with TypeScript for reliability
@@ -27,12 +27,12 @@ Many companies provide GitHub Advanced Security alert data only as JSON exports,
 - **Vue 3** - Progressive JavaScript framework
 - **Vite** - Next-generation frontend tooling
 - **TypeScript** - Type-safe JavaScript
-- **PrimeVue** - Premium Vue UI component library
+- **Naive UI** - Modern Vue 3 component library
 - **Pinia** - State management
 - **Fuse.js** - Fuzzy search library
 - **markdown-it** - Markdown parser and renderer
 - **DOMPurify** - XSS protection for rendering
-- **Lucide Vue** - Beautiful icon library
+- **@vicons/tabler** - Beautiful icon library
 
 ## 🚀 Getting Started
 
@@ -102,11 +102,15 @@ GHAS-Viewer/
 │   ├── components/           # Vue components
 │   │   ├── AlertDetailDialog.vue    # Detailed alert view
 │   │   ├── AlertTable.vue          # Alert list table
+│   │   ├── AzureSourceSetup.vue    # Azure DevOps source config
 │   │   ├── CodePreview.vue         # Syntax-highlighted code
+│   │   ├── FileSourceSetup.vue     # Local file source config
 │   │   ├── FilterPanel.vue         # Filter controls
+│   │   ├── LoadAlertsPanel.vue     # Alert loading controls
 │   │   ├── MarkdownViewer.vue      # Markdown renderer
 │   │   └── TopNav.vue              # Navigation header
 │   ├── services/             # Business logic
+│   │   ├── azureDevOpsClient.ts # Azure DevOps API client
 │   │   ├── ghasParser.ts     # GHAS JSON parsing
 │   │   ├── searchIndex.ts    # Search functionality
 │   │   └── sourceReader.ts   # File reading utilities
@@ -116,7 +120,10 @@ GHAS-Viewer/
 │   ├── types/                # TypeScript types
 │   │   └── ghas.ts           # GHAS data type definitions
 │   ├── utils/                # Utility functions
-│   │   └── dateFormatter.ts  # Date formatting
+│   │   ├── dateFormatter.ts  # Date formatting
+│   │   ├── htmlEntities.ts   # HTML entity helpers
+│   │   ├── severityUtils.ts  # Severity helpers
+│   │   └── snippetUtils.ts   # Code snippet helpers
 │   ├── styles/               # Stylesheets
 │   ├── App.vue               # Root component
 │   └── main.ts               # Application entry point
@@ -167,7 +174,7 @@ Generates both standard and single-file production builds.
 
 - **Vite Config**: [vite.config.ts](vite.config.ts)
 - **TypeScript Config**: [tsconfig.json](tsconfig.json)
-- **Theme Config**: Uses PrimeVue's built-in theme system
+- **Theme Config**: Uses Naive UI's theme system
 
 ## 📝 JSON Format
 
